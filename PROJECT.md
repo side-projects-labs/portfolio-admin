@@ -4,6 +4,7 @@
   "slug": "portfolio-admin",
   "title": "포트폴리오 관리자",
   "description": "프로젝트·프로필·기술 스택을 관리하고 마크다운 본문과 이미지를 편집하는 Next.js 기반 관리자 대시보드입니다. 별도의 포트폴리오 API와 연동해 콘텐츠 관리 작업을 한곳에 모았습니다.",
+  "image": "https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/145f37b1bf59f3b75e6acb7251b83489b979c122/PROJECT.png",
   "stacks": [
     "Next.js",
     "React",

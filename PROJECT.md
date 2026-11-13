@@ -7,13 +7,13 @@
   "image": "https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/145f37b1bf59f3b75e6acb7251b83489b979c122/PROJECT.png",
   "stacks": [
     "Next.js",
-    "React",
+    "React.js",
     "TypeScript",
-    "Tailwind CSS",
+    "TailwindCSS",
     "SWR",
     "Zustand",
     "React Hook Form",
-    "Supabase",
+    "supabase",
     "VisActor"
   ],
   "linkDemo": "https://admin.ycseng.com",

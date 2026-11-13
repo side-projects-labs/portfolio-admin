@@ -4,15 +4,16 @@
   "slug": "portfolio-admin",
   "title": "포트폴리오 관리자",
   "description": "프로젝트·프로필·기술 스택을 관리하고 마크다운 본문과 이미지를 편집하는 Next.js 기반 관리자 대시보드입니다. 별도의 포트폴리오 API와 연동해 콘텐츠 관리 작업을 한곳에 모았습니다.",
+  "image": "https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/145f37b1bf59f3b75e6acb7251b83489b979c122/PROJECT.png",
   "stacks": [
     "Next.js",
-    "React",
+    "React.js",
     "TypeScript",
-    "Tailwind CSS",
+    "TailwindCSS",
     "SWR",
     "Zustand",
     "React Hook Form",
-    "Supabase",
+    "supabase",
     "VisActor"
   ],
   "linkDemo": "https://admin.ycseng.com",
@@ -21,6 +22,14 @@
 ```
 
 # 포트폴리오 관리자
+
+## 목차
+
+- [🧭 코드 수정에서 콘텐츠 관리로](#-%EC%BD%94%EB%93%9C-%EC%88%98%EC%A0%95%EC%97%90%EC%84%9C-%EC%BD%98%ED%85%90%EC%B8%A0-%EA%B4%80%EB%A6%AC%EB%A1%9C)
+- [🗂️ 관리 화면에서 다루는 작업](#%EF%B8%8F-%EA%B4%80%EB%A6%AC-%ED%99%94%EB%A9%B4%EC%97%90%EC%84%9C-%EB%8B%A4%EB%A3%A8%EB%8A%94-%EC%9E%91%EC%97%85)
+- [✍️ 콘텐츠를 작성하고 공개하기까지](#%EF%B8%8F-%EC%BD%98%ED%85%90%EC%B8%A0%EB%A5%BC-%EC%9E%91%EC%84%B1%ED%95%98%EA%B3%A0-%EA%B3%B5%EA%B0%9C%ED%95%98%EA%B8%B0%EA%B9%8C%EC%A7%80)
+- [🛠️ 구조와 구현 선택](#%EF%B8%8F-%EA%B5%AC%EC%A1%B0%EC%99%80-%EA%B5%AC%ED%98%84-%EC%84%A0%ED%83%9D)
+- [🌱 콘텐츠와 함께 확장할 관리 공간](#-%EC%BD%98%ED%85%90%EC%B8%A0%EC%99%80-%ED%95%A8%EA%BB%98-%ED%99%95%EC%9E%A5%ED%95%A0-%EA%B4%80%EB%A6%AC-%EA%B3%B5%EA%B0%84)
 
 나만의 포트폴리오를 만들면서, 직접 사용한 기술과 그 과정에서 내린 선택을 풀어낼 공간이 필요했습니다. 포트폴리오 웹앱을 구축하면서 프로젝트를 소개할 공간은 마련했지만, 콘텐츠를 추가하고 다듬을 때마다 코드를 수정해야 했습니다. 프로젝트가 늘어날수록 수동으로 변경해야 하는 범위도 함께 커졌습니다.
 

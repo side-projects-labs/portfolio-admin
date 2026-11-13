@@ -1,6 +1,6 @@
 # 프로젝트 소개 이미지
 
-PROJECT.md 본문에서 사용하는 이미지는 public/project에 보관합니다. 공개 저장소의 master 원본 URL로 연결하므로 문서와 이미지를 함께 머지합니다.
+PROJECT.md 본문에서 사용하는 이미지는 public/project에 보관합니다. 공개 저장소에서 이미지가 추가된 커밋(e0ad687d4513509f858be4ca5907a820a8ebe593)의 원본 URL로 연결합니다. PR 검토 중에도 이미지가 보이고, 이후 파일이 바뀌어도 본문에서 참조하는 이미지가 유지됩니다. 이미지를 갱신하면 새 커밋의 공개 URL로 본문도 함께 갱신합니다.
 
 - admin-projects.png: 2026-11-13에 https://local.ycseng.com:5001/project에서 실행한 실제 ADMIN 화면입니다. 기존 Chrome의 인증된 화면을 macOS 화면 캡처로 저장했으며 브라우저 탭·주소·북마크 영역은 캡처 범위에서 제외했습니다. 프로젝트 생성·수정·발행 작업은 수행하지 않았습니다.
 - admin-login.png: 로컬에서 실행한 실제 로그인 화면을 Playwright로 캡처한 이미지입니다.

@@ -32,7 +32,7 @@
 
 화면의 기능이나 표현 방식을 바꿀 때는 코드를 수정하되, 프로젝트를 추가하거나 소개 내용을 다듬는 일은 관리 화면에서 처리할 수 있도록 작업의 경계를 나눴습니다. 공개 포트폴리오는 콘텐츠를 보여주는 공간으로, 어드민은 그 콘텐츠를 작성하고 관리하는 공간으로 구성했습니다.
 
-![작성·공개 관리·API 저장과 이미지 업로드 흐름](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/master/public/project/content-workflow.png)
+![작성·공개 관리·API 저장과 이미지 업로드 흐름](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/content-workflow.png)
 
 *프로젝트를 작성해 공개 상태를 관리하는 흐름과, 이미지 파일·콘텐츠 저장의 역할을 구분했습니다.*
 
@@ -58,7 +58,7 @@
 
 목록은 페이지 단위로 조회하며, 각 항목의 발행·미발행 상태를 바꾸거나 삭제할 수 있습니다. 노출 순서는 위·아래 이동 버튼과 드래그로 변경합니다. 변경 요청 후에는 관련 목록 데이터를 다시 검증해 관리 화면에 반영합니다.
 
-![로컬 ADMIN의 실제 프로젝트 목록 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/master/public/project/admin-projects.png)
+![로컬 ADMIN의 실제 프로젝트 목록 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/admin-projects.png)
 
 *로컬에서 실행한 ADMIN의 실제 목록 화면입니다. 프로젝트 정보와 기술 스택, 발행 상태, 순서 조정 기능을 한곳에서 확인합니다.*
 
@@ -98,7 +98,7 @@ Next.js App Router가 관리자 화면과 API 중계 경로를 구성하고, 별
 
 Google·GitHub OAuth 시작 주소로 이동해 외부 API의 인증 흐름을 사용하고, 앱에서는 쿠키에 기반한 페이지 접근과 로그인 상태를 확인합니다. 로그인 뒤 돌아갈 주소는 내부 경로로 제한해 외부 주소나 잘못된 경로가 복귀 대상으로 사용되지 않도록 검증합니다.
 
-![로컬에서 실행한 관리자 OAuth 로그인 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/master/public/project/admin-login.png)
+![로컬에서 실행한 관리자 OAuth 로그인 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/admin-login.png)
 
 *로컬에서 실행한 ADMIN의 실제 로그인 화면입니다.*
 

@@ -10,8 +10,8 @@ import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { FormInput } from '@/components/ui/form/input';
 import { FormSection } from '@/components/ui/form/section';
+import { ProjectEditGuard } from '@/components/ui/project/edit-guard';
 import { RadioCard } from '@/components/ui/radio-card';
-import { Skeleton } from '@/components/ui/skeleton';
 
 import { Tabs } from '@/components/ui/tab';
 import { type AdminTagResponse, type AdminProjectUpdateRequest } from '@/docs/api';
@@ -19,16 +19,19 @@ import { getData, patchData } from '@/lib/api';
 import { fetcher } from '@/lib/fetcher';
 import { getFileUrl } from '@/lib/file/read';
 import { uploadFile } from '@/lib/file/upload';
+import { canEditProject } from '@/lib/project-edit-policy';
+import type { ProjectDetailResponse } from '@/types/project';
 
 export default function ProjectCreate() {
   const params = useSearchParams();
   const router = useRouter();
 
   const slug = params.get('slug');
-  const { data, isLoading } = useSWR<{ data: AdminProjectUpdateRequest | null }>(
+  const { data, error, isLoading, mutate } = useSWR<ProjectDetailResponse>(
     slug ? `/api/project/slug?slug=${slug}` : null,
     fetcher,
   );
+  const canEdit = canEditProject(data, isLoading, error);
   const { data: stacksData } = useSWR<{ data: AdminTagResponse[] }>(`/api/stacks`, fetcher);
 
   /*
@@ -69,6 +72,7 @@ export default function ProjectCreate() {
   } = methods;
 
   const handleCheckDuplicate = async () => {
+    if (!canEdit) return;
     const response = await getData<number>(`/project/over-slug/${watch('slug')}`, {}, true);
 
     if (response.status) {
@@ -86,6 +90,7 @@ export default function ProjectCreate() {
 
   const handleFileUpload = async (e: React.FormEvent<HTMLInputElement>) => {
     e.preventDefault();
+    if (!canEdit) return;
     toast.success('업로드 진행중');
 
     const file = e.currentTarget?.files?.[0];
@@ -106,6 +111,7 @@ export default function ProjectCreate() {
   };
 
   const onSubmit = async (data: AdminProjectUpdateRequest) => {
+    if (!canEdit) return;
     switch (overSlug.status) {
       case 'over':
         toast.error('중복된 slug를 사용할 수 없습니다.');
@@ -118,7 +124,9 @@ export default function ProjectCreate() {
     }
     const response = await patchData(`/api/project/edit`, data);
     if (response.status !== 200) {
-      throw new Error('프로젝트 수정에 실패했습니다.');
+      toast.error('프로젝트를 수정하지 못했습니다. 편집 상태를 다시 확인해주세요.');
+      await mutate();
+      return;
     }
     router.push('/project');
   };
@@ -127,11 +135,10 @@ export default function ProjectCreate() {
     if (data?.data) {
       reset(data.data);
     }
-  }, [data]);
+  }, [data, reset]);
 
   return (
-    <>
-      {isLoading && <Skeleton />}
+    <ProjectEditGuard response={data} isLoading={isLoading} error={error}>
       {data?.data && (
         <form>
           <FormSection>
@@ -337,6 +344,6 @@ export default function ProjectCreate() {
           </button>
         </form>
       )}
-    </>
+    </ProjectEditGuard>
   );
 }

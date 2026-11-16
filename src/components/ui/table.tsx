@@ -6,6 +6,7 @@ import React from 'react';
 import { useMemo, isValidElement, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import ReactPaginate from 'react-paginate';
+import { cn } from '@/lib/utils';
 import { useTableStore } from '@/lib/zustand/table';
 import type { Table, TableData, TableHeader, TableOptions, TableProps } from '@/types/table';
 
@@ -177,7 +178,10 @@ function Table({ table, isLoading = false }: TableProps & { onPageChange?: (page
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           data-row-index={index}
-                          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
+                          className={cn(
+                            'bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600',
+                            table.rowClassName?.(item, index),
+                          )}
                         >
                           {renderItem(item)}
                         </tr>

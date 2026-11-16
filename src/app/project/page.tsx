@@ -5,7 +5,7 @@ import { isArray, isEqual } from 'lodash-es';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
+import { FaAngleDown, FaAngleUp, FaLock } from 'react-icons/fa';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Table } from '@/components/ui/table';
@@ -107,6 +107,7 @@ export default function Project() {
       return [];
     }
     return projects.map((item, index) => {
+      const canEdit = item.isBlocked === false;
       const stacksArray = JSON.parse(item.stacks);
 
       return {
@@ -152,7 +153,21 @@ export default function Project() {
             </div>
           </div>
         ),
-        title: item.title,
+        title: (
+          <div className="space-y-2">
+            <div className="font-medium">{item.title}</div>
+            <span
+              className={
+                item.isBlocked === true
+                  ? 'inline-flex items-center gap-1.5 rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                  : 'inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-900 dark:bg-blue-950 dark:text-blue-200'
+              }
+            >
+              {item.isBlocked === true && <FaLock aria-hidden="true" size={11} />}
+              {item.isBlocked === true ? '자동 동기화 · 읽기 전용' : canEdit ? '직접 관리' : '편집 상태 확인 중'}
+            </span>
+          </div>
+        ),
         slug: {
           link: {
             title: item.slug,
@@ -195,7 +210,7 @@ export default function Project() {
               contents: {
                 link: {
                   title: item.content?.length > 10 ? item.content.slice(0, 10) + '...' : item.content,
-                  href: `/project/write/${item.slug}`,
+                  href: canEdit ? `/project/write/${item.slug}` : `/project/preview/${item.slug}`,
                 },
               },
             }
@@ -205,6 +220,7 @@ export default function Project() {
                   variant="secondary"
                   className="bg-gray-200 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-600 mb-2"
                   size="sm"
+                  disabled={!canEdit}
                   onClick={() => router.push(`/project/write/${item.slug}`)}
                 >
                   내용 작성
@@ -227,13 +243,15 @@ export default function Project() {
               size="sm"
               onClick={() => handleChangeStatus(item)}
             >
-              변경
+              {item.isShow ? '숨김' : '게시'}
             </Button>
             <br />
             <Button
               variant="secondary"
               className="bg-green-200 dark:bg-green-500 hover:bg-green-400 dark:hover:bg-green-600 mb-2"
               size="sm"
+              disabled={!canEdit}
+              title={!canEdit ? '콘텐츠는 연결된 저장소에서 수정해주세요.' : undefined}
               onClick={() => router.push(`/project/edit?slug=${item.slug}`)}
             >
               수정
@@ -297,6 +315,10 @@ export default function Project() {
         table={{
           header: projectTableHeader,
           body: projectTableData,
+          rowClassName: (_row, index) =>
+            data?.data.data[index]?.isBlocked === true
+              ? 'bg-slate-100 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-900 border-l-4 border-l-slate-400 dark:border-l-slate-500'
+              : undefined,
           pagination: {
             allTotal: allCount.current ?? INITIAL_PAGINATION['ALL_TOTAL'],
             total: data?.data.total ?? INITIAL_PAGINATION['TOTAL'],

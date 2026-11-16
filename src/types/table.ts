@@ -45,6 +45,7 @@ export interface Pagination {
 export interface Table<T> {
   header: TableHeader[];
   body: T[];
+  rowClassName?: (row: T, index: number) => string | undefined;
   draggableOption?: DraggableOptions;
   pagination?: Pagination | null;
 }

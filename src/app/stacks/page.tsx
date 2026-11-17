@@ -2,7 +2,7 @@
 
 import { StackTag } from '@yeoncheols/portfolio-core-ui';
 import { isEqual } from 'lodash-es';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import { Button, Modal, Table, StackIconManager, StackForm } from '@/components/ui';
@@ -112,28 +112,34 @@ export default function StacksManagement() {
   };
 
   // 스택 삭제
-  const handleDeleteStack = async (stackName: string) => {
-    if (!confirm(`정말로 "${stackName}" 스택을 삭제하시겠습니까?`)) return;
+  const handleDeleteStack = useCallback(
+    async (stackName: string) => {
+      if (!confirm(`정말로 "${stackName}" 스택을 삭제하시겠습니까?`)) return;
 
-    try {
-      const response = await deleteData(`/api/stacks/${stackName}`);
+      try {
+        const response = await deleteData(`/api/stacks/${stackName}`);
 
-      if (response.status) {
-        await stacksMutate();
+        if (response.status) {
+          await stacksMutate();
+        }
+      } catch {
+        console.info('Failed to delete stack');
       }
-    } catch {
-      console.info('Failed to delete stack');
-    }
-  };
+    },
+    [stacksMutate],
+  );
 
   // 수정 모드 시작
-  const startEditing = (stack: AdminTagResponse) => {
-    setFormMode('edit');
-    setValue('name', stack.name);
-    setValue('icon', stack.icon);
-    setValue('color', stack.color);
-    setValue('category', stack.category);
-  };
+  const startEditing = useCallback(
+    (stack: AdminTagResponse) => {
+      setFormMode('edit');
+      setValue('name', stack.name);
+      setValue('icon', stack.icon);
+      setValue('color', stack.color);
+      setValue('category', stack.category);
+    },
+    [setValue],
+  );
 
   // 등록 취소
   const cacncelMode = () => {
@@ -187,14 +193,14 @@ export default function StacksManagement() {
           </div>
         ),
       })) || [],
-    [stacksData],
+    [handleDeleteStack, stacksData, startEditing],
   );
 
   useEffect(() => {
     if (!isEqual(stacksTableData, table.body)) {
       setBody(stacksTableData);
     }
-  }, [stacksTableData]);
+  }, [setBody, stacksTableData, table.body]);
 
   return (
     <>

@@ -17,18 +17,14 @@
 - [React 19.0.0-rc](https://react.dev/) - UI 라이브러리
 - [TypeScript 5.5.4](https://www.typescriptlang.org/) - 타입 안정성
 - [Tailwind CSS 3.4.1](https://tailwindcss.com/) - 스타일링
-- [VisActor 1.12.10](https://visactor.io/) - 데이터 시각화
 - [Supabase 2.49.4](https://supabase.com/) - 백엔드 및 데이터베이스
-- [AWS S3 SDK 3.812.0](https://aws.amazon.com/s3/) - 파일 스토리지
 - [React Hook Form 7.56.4](https://react-hook-form.com/) - 폼 관리
 - [SWR 2.3.3](https://swr.vercel.app/) - 데이터 페칭
-- [Jotai 2.10.1](https://jotai.org/) - 상태 관리
 - [React Markdown 10.1.0](https://github.com/remarkjs/react-markdown) - 마크다운 렌더링
 - [Next Themes 0.3.0](https://github.com/pacocoursey/next-themes) - 테마 관리
 - [React Hot Toast 2.5.2](https://react-hot-toast.com/) - 토스트 알림
 - [Radix UI 2.1.1](https://www.radix-ui.com/) - 접근성 컴포넌트
 - [Lucide React 0.436.0](https://lucide.dev/) - 아이콘
-- [Date-fns 3.6.0](https://date-fns.org/) - 날짜 유틸리티
 
 ## 시작하기
 

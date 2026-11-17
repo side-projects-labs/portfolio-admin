@@ -86,7 +86,7 @@ export default function ProfileEdit() {
     if (data?.data) {
       reset(data.data);
     }
-  }, [data]);
+  }, [data, reset]);
 
   return (
     <>

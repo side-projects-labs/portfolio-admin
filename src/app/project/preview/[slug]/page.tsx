@@ -41,7 +41,7 @@ export default function ProjectPreview() {
 
   useEffect(() => {
     setContextProps({ header: <TopNav title="프로젝트 미리보기" /> });
-  }, []);
+  }, [setContextProps]);
 
   if (!data) {
     return <Loading />;

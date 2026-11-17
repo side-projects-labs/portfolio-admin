@@ -29,7 +29,7 @@ export function StackIconManager({ className = '' }: IconManagerProps) {
   useEffect(() => {
     // 컴포넌트 마운트 후 데이터 로드
     loadStacksData();
-  }, []);
+  }, [loadStacksData]);
 
   const cachedIcons = getCachedIcons();
 

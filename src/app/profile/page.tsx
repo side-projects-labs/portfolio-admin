@@ -3,13 +3,12 @@ import dayjs from 'dayjs';
 import { isArray, isEqual } from 'lodash-es';
 import NextImage from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/ui/loading';
 import { Table } from '@/components/ui/table';
-import { WaringInfo } from '@/components/ui/waring-info';
 import { profileTableHeader } from '@/data/table/profile';
 import { type AdminProfileResponse } from '@/docs/api';
 import { deleteData, patchData } from '@/lib/api';
@@ -17,6 +16,7 @@ import { fetcher } from '@/lib/fetcher';
 import { downloadFile } from '@/lib/file/downloadFile';
 import { resizeFile } from '@/lib/file/resizeFile';
 import { useTableStore } from '@/lib/zustand/table';
+import { ProfileImageUpload } from './ProfileImageUpload';
 
 export default function Profile() {
   const router = useRouter();
@@ -27,16 +27,22 @@ export default function Profile() {
     fetcher,
   );
 
-  const handleChangeStatus = async (request: AdminProfileResponse) => {
-    const { id, isActive } = request;
-    await patchData('/api/profile/show', { id, isActive: !isActive });
-    await mutate();
-  };
+  const handleChangeStatus = useCallback(
+    async (request: AdminProfileResponse) => {
+      const { id, isActive } = request;
+      await patchData('/api/profile/show', { id, isActive: !isActive });
+      await mutate();
+    },
+    [mutate],
+  );
 
-  const handleDelete = async (slug: AdminProfileResponse['id']) => {
-    await deleteData(`/api/profile/delete?slug=${slug}`);
-    await mutate();
-  };
+  const handleDelete = useCallback(
+    async (slug: AdminProfileResponse['id']) => {
+      await deleteData(`/api/profile/delete?slug=${slug}`);
+      await mutate();
+    },
+    [mutate],
+  );
 
   const handleDownImg = async () => {
     if (!data?.data) {
@@ -147,13 +153,13 @@ export default function Profile() {
         </div>
       ),
     }));
-  }, [data, router]);
+  }, [data, handleChangeStatus, handleDelete, router]);
 
   useEffect(() => {
     if (!isEqual(profileTableData, table.body)) {
       setBody(profileTableData);
     }
-  }, [profileTableData]);
+  }, [profileTableData, setBody, table.body]);
 
   if (error || data?.status === false)
     return (
@@ -177,37 +183,14 @@ export default function Profile() {
           포트폴리오에 사용할 이미지를 등록하고 활성 상태를 관리합니다.
         </p>
       </div>
-      <details className="mb-6 rounded-lg border border-border p-4">
-        <summary className="cursor-pointer text-sm font-medium">이미지 압축 도구</summary>
-        <WaringInfo
-          headTitle="이미지 업로드"
-          description={
-            <>
-              이미지는 최대 1MB 까지 업로드 하실 수 있습니다. 용량 압축은 아래 파일 업로드 버튼을 클릭하여 진행해주세요.
-            </>
-          }
-        >
-          <input
-            className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-            aria-label="압축할 프로필 이미지"
-            id="resize"
-            type="file"
-            onChange={handleResizeFile}
-            accept="image/*"
-          />
-        </WaringInfo>
-      </details>
+      <ProfileImageUpload onFileChange={handleResizeFile} />
 
-      <Button variant="secondary" className="mb-4" onClick={() => router.push('/profile/create')}>
-        프로필 생성
-      </Button>
-      <Button
-        variant="ghost"
-        className="ml-4 bg-gray-200 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-600"
-        onClick={handleDownImg}
-      >
-        프로필 다운로드
-      </Button>
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <Button onClick={() => router.push('/profile/create')}>프로필 생성</Button>
+        <Button variant="outline" onClick={handleDownImg}>
+          프로필 다운로드
+        </Button>
+      </div>
 
       {profileTableData.length === 0 && (
         <p className="my-6 rounded-lg border border-dashed border-border px-6 py-16 text-center text-sm text-muted-foreground">

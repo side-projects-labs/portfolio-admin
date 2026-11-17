@@ -22,8 +22,18 @@ vi.mock('react-beautiful-dnd', () => ({
   DragDropContext: ({ children }: { children: ReactNode }) => children,
   Droppable: ({ children }: { children: (provided: Record<string, unknown>) => ReactNode }) =>
     children({ innerRef: vi.fn(), placeholder: null }),
-  Draggable: ({ children }: { children: (provided: Record<string, unknown>) => ReactNode }) =>
-    children({ innerRef: vi.fn(), draggableProps: {}, dragHandleProps: {} }),
+  Draggable: ({
+    children,
+    isDragDisabled,
+  }: {
+    children: (provided: Record<string, unknown>) => ReactNode;
+    isDragDisabled: boolean;
+  }) =>
+    children({
+      innerRef: vi.fn(),
+      draggableProps: {},
+      dragHandleProps: isDragDisabled ? null : { role: 'button', tabIndex: 0 },
+    }),
 }));
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: ReactNode }) => children,
@@ -60,5 +70,33 @@ describe('테이블 행 표시', () => {
     );
     expect(screen.getByRole('row', { name: '기존 항목 수정' })).toHaveClass('bg-white');
     expect(screen.getByRole('button', { name: '수정' })).toBeEnabled();
+  });
+});
+
+describe('테이블 상태와 소비 화면 경계', () => {
+  it('다른 화면의 저장된 헤더 대신 전달받은 열을 표시한다', () => {
+    render(<Table table={{ header: [{ id: 1, name: '기술 스택' }], body: [{ name: 'React' }] }} />);
+    expect(screen.getByRole('columnheader', { name: '기술 스택' })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: '프로젝트' })).not.toBeInTheDocument();
+  });
+  it('로딩이 끝난 빈 결과에 안내를 표시한다', () => {
+    render(<Table table={{ header: [{ id: 1, name: '프로필' }], body: [] }} />);
+    expect(screen.getByText('등록된 항목이 없습니다.')).toBeInTheDocument();
+  });
+});
+
+describe('드래그 접근성', () => {
+  it('드래그를 켜도 행과 셀의 역할을 유지한다', () => {
+    render(
+      <Table
+        table={{
+          header: [{ id: 1, name: '제목' }],
+          body: [{ title: '작업 항목' }],
+          draggableOption: { draggable: true },
+        }}
+      />,
+    );
+    const row = screen.getByRole('row', { name: /작업 항목/ });
+    expect(within(row).getByRole('cell')).toBeInTheDocument();
   });
 });

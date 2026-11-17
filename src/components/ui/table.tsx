@@ -1,246 +1,224 @@
 'use client';
-
-import { AnimatePresence, motion } from 'framer-motion';
+import { GripVertical } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
-import { useMemo, isValidElement, useEffect } from 'react';
+import { useEffect, useRef, isValidElement } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import ReactPaginate from 'react-paginate';
 import { cn } from '@/lib/utils';
 import { useTableStore } from '@/lib/zustand/table';
-import type { Table, TableData, TableHeader, TableOptions, TableProps } from '@/types/table';
+import type { TableData, TableOptions, TableProps } from '@/types/table';
 
-function Table({ table, isLoading = false }: TableProps & { onPageChange?: (page: number) => void }) {
-  const { table: tableStore, checkbox, setTable, selectCheckbox, allSelectCheckbox } = useTableStore();
-
-  const header = useMemo(() => {
-    const renderHeaderItem = (item: TableHeader) => {
-      if (item.type === 'checkbox') {
-        return (
-          <th key={item.id} scope="col" className="px-6 py-3">
-            <input
-              type="checkbox"
-              className="w-4 h-4"
-              onChange={e => {
-                const checkboxList = tableStore.body.flatMap(row =>
-                  Object.values(row)
-                    .filter(value => (value as TableOptions).checkbox?.id && (value as TableOptions).checkbox?.value)
-                    .map(value => {
-                      const { id, value: val } = (value as TableOptions).checkbox!;
-                      return { id, value: val, checked: true };
-                    }),
-                );
-
-                allSelectCheckbox(e.currentTarget.checked ? checkboxList : []);
-              }}
-            />
-          </th>
-        );
-      }
-      return (
-        <th key={item.id} scope="col" className="px-6 py-3">
-          {item.name}
-        </th>
-      );
-    };
-    return (
-      tableStore.header && (
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            {tableStore.header.map(item => {
-              return renderHeaderItem(item);
-            })}
-          </tr>
-        </thead>
-      )
-    );
-  }, [tableStore]);
-
-  const renderType = (options: TableOptions) => {
-    if (options?.link && options.link.href) {
-      const { href, title, ...linkProps } = options.link;
-
-      if (!href.startsWith('http')) {
-        return (
-          <Link {...linkProps} href={href} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-            {title}
-          </Link>
-        );
-      }
-      // 외부 url
-      return (
-        <a {...linkProps} href={href} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+function Table({ table, isLoading = false }: TableProps) {
+  const { checkbox, setTable, selectCheckbox, allSelectCheckbox } = useTableStore();
+  const rowCheckboxes = table.body.flatMap(row =>
+    Object.values(row).flatMap(value =>
+      value && typeof value === 'object' && !isValidElement(value) && 'checkbox' in value && value.checkbox
+        ? [value.checkbox]
+        : [],
+    ),
+  );
+  const allChecked =
+    rowCheckboxes.length > 0 &&
+    rowCheckboxes.every(item => checkbox.some(selected => selected.id === item.id && selected.checked));
+  const initialTable = useRef(table);
+  useEffect(() => {
+    setTable(initialTable.current);
+  }, [setTable]);
+  useEffect(() => {
+    allSelectCheckbox([]);
+  }, [table.pagination?.page, allSelectCheckbox]);
+  const renderValue = (value: TableData[string]) => {
+    if (isValidElement(value)) return value;
+    if (value === null || value === undefined) return null;
+    if (typeof value !== 'object') return String(value);
+    const options = value as TableOptions;
+    if (options.link?.href) {
+      const { href, title, ...props } = options.link;
+      const className =
+        'font-medium text-foreground underline-offset-4 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+      return href.startsWith('http') ? (
+        <a {...props} href={href} className={className}>
           {title}
         </a>
-      );
-    }
-    if (options?.status) {
-      const { status, title } = options.status;
-      return (
-        <div className="flex items-center">
-          {status ? (
-            <div className="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div>
-          ) : (
-            <div className="h-2.5 w-2.5 rounded-full bg-red-500 me-2"></div>
-          )}
+      ) : (
+        <Link {...props} href={href} className={className}>
           {title}
-        </div>
+        </Link>
       );
     }
-    if (options?.checkbox) {
+    if (options.checkbox) {
       const { id, value } = options.checkbox;
-      const isChecked = checkbox.find(checkbox => checkbox.id === id)?.checked;
-
       return (
         <input
           type="checkbox"
-          key={id}
-          value={value}
-          checked={isChecked || false}
-          onChange={e => {
-            selectCheckbox({ id, value, checked: e.currentTarget.checked });
-          }}
-          className="w-4 h-4"
+          aria-label={`항목 ${value} 선택`}
+          checked={checkbox.some(item => item.id === id && item.checked)}
+          onChange={event => selectCheckbox({ id, value, checked: event.target.checked })}
+          className="size-4 rounded border-input accent-primary"
         />
       );
     }
-  };
-
-  const renderItem = (data: TableData) => {
-    return Object.entries(data).map(([key, value]) => {
-      if (isValidElement(value)) {
-        return (
-          <td key={key} className="px-6 py-3">
-            {value}
-          </td>
-        );
-      }
-      if (typeof value === 'object') {
-        return (
-          <td key={key} className="px-6 py-3">
-            {renderType(value)}
-          </td>
-        );
-      }
-
+    if (options.status)
       return (
-        <td key={key} className="px-6 py-3">
-          {value}
-        </td>
-      );
-    });
-  };
-
-  // body는 table.body만 사용 (slice 등 페이징 연산 제거)
-  const body = useMemo(() => {
-    return (
-      <DragDropContext onDragEnd={e => table.draggableOption?.onDrop?.(e)}>
-        <Droppable
-          droppableId="table-body"
-          direction="vertical"
-          type="table-body"
-          isDropDisabled={false}
-          isCombineEnabled={false}
-          ignoreContainerClipping={false}
-        >
-          {provided => (
-            <AnimatePresence mode="wait">
-              <motion.tbody
-                key={table.pagination?.page}
-                id="root-tbody"
-                ref={provided.innerRef}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
-              >
-                {isLoading && (!table.body || table.body.length === 0) ? (
-                  <tr>
-                    <td colSpan={tableStore.header?.length || 1} className="text-center py-8">
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                        <span>로딩 중...</span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  table.body &&
-                  table.body.map((item, index) => (
-                    <Draggable
-                      key={`row-${index}`}
-                      draggableId={`row-${index}`}
-                      index={index}
-                      isDragDisabled={!table.draggableOption?.draggable}
-                    >
-                      {provided => (
-                        <tr
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          data-row-index={index}
-                          className={cn(
-                            'bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600',
-                            table.rowClassName?.(item, index),
-                          )}
-                        >
-                          {renderItem(item)}
-                        </tr>
-                      )}
-                    </Draggable>
-                  ))
-                )}
-                {provided.placeholder}
-              </motion.tbody>
-            </AnimatePresence>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-1 text-xs font-medium',
+            options.status.status
+              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+              : 'bg-muted text-muted-foreground',
           )}
-        </Droppable>
-      </DragDropContext>
-    );
-  }, [table, checkbox, isLoading, tableStore.header]);
-
-  useEffect(() => {
-    setTable(table);
-  }, []);
-
-  return (
-    <motion.div
-      className="relative overflow-x-auto shadow-md sm:rounded-lg"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.6, ease: 'easeInOut' }}
-    >
-      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        {header}
-        {body}
-      </table>
-      <div className="flex justify-center my-4">
-        {table.pagination && table.pagination.allTotal > 0 && (
-          <ReactPaginate
-            previousLabel={'<'}
-            nextLabel={'>'}
-            breakLabel={'...'}
-            pageCount={Math.ceil(table.pagination.allTotal / table.pagination.size)}
-            marginPagesDisplayed={table.pagination.page}
-            pageRangeDisplayed={table.pagination.size}
-            onPageChange={({ selected }) => {
-              if (table.pagination) {
-                setTable({ ...table, pagination: { ...table.pagination, page: selected + 1 } });
-                table.pagination.onPageChange?.(selected + 1);
-              }
-            }}
-            containerClassName={'flex gap-2 pagination'}
-            pageClassName={'px-2 py-1 border rounded'}
-            activeClassName={'bg-blue-500 text-white'}
-            previousClassName={'px-2 py-1 border rounded'}
-            nextClassName={'px-2 py-1 border rounded'}
-            breakClassName={'px-2 py-1'}
-            forcePage={table.pagination.page - 1}
+        >
+          <span
+            aria-hidden="true"
+            className={cn('size-1.5 rounded-full', options.status.status ? 'bg-emerald-500' : 'bg-current')}
           />
-        )}
+          {options.status.title}
+        </span>
+      );
+    return null;
+  };
+  const pageCount = table.pagination ? Math.ceil(table.pagination.allTotal / table.pagination.size) : 0;
+  return (
+    <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-background">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-[13px] text-muted-foreground">
+          <thead className="border-b border-border bg-muted/50 text-xs font-medium text-muted-foreground">
+            <tr>
+              {table.header.map(item => (
+                <th key={item.id} scope="col" className="whitespace-nowrap px-4 py-3">
+                  {item.type === 'checkbox' ? (
+                    <input
+                      type="checkbox"
+                      aria-label="현재 페이지 전체 선택"
+                      checked={allChecked}
+                      disabled={!rowCheckboxes.length}
+                      onChange={event =>
+                        allSelectCheckbox(
+                          event.target.checked ? rowCheckboxes.map(item => ({ ...item, checked: true })) : [],
+                        )
+                      }
+                      className="size-4 rounded accent-primary"
+                    />
+                  ) : (
+                    item.name
+                  )}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <DragDropContext onDragEnd={result => table.draggableOption?.onDrop?.(result)}>
+            <Droppable
+              droppableId="table-body"
+              direction="vertical"
+              type="table-body"
+              isDropDisabled={!table.draggableOption?.draggable}
+              isCombineEnabled={false}
+              ignoreContainerClipping={false}
+            >
+              {provided => (
+                <tbody ref={provided.innerRef} {...provided.droppableProps}>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={table.header.length || 1} className="px-6 py-16 text-center">
+                        <span role="status" className="inline-flex items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="size-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent"
+                          />
+                          로딩 중...
+                        </span>
+                      </td>
+                    </tr>
+                  ) : table.body.length === 0 ? (
+                    <tr>
+                      <td colSpan={table.header.length || 1} className="px-6 py-16 text-center">
+                        등록된 항목이 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                    table.body.map((row, index) => {
+                      const checkboxOption = Object.values(row).find(
+                        value => value && typeof value === 'object' && 'checkbox' in value,
+                      ) as TableOptions | undefined;
+                      const key = checkboxOption?.checkbox?.value ?? `row-${index}`;
+                      return (
+                        <Draggable
+                          key={key}
+                          draggableId={key}
+                          index={index}
+                          isDragDisabled={!table.draggableOption?.draggable}
+                        >
+                          {drag => (
+                            <tr
+                              ref={drag.innerRef}
+                              {...drag.draggableProps}
+                              data-row-index={index}
+                              className={cn(
+                                'border-b border-border bg-white transition-colors last:border-b-0 hover:bg-muted/40 dark:bg-background',
+                                table.rowClassName?.(row, index),
+                              )}
+                            >
+                              {Object.entries(row).map(([name, value], column) => (
+                                <td key={name} className="px-4 py-4 align-middle">
+                                  {column === 0 && table.draggableOption?.draggable ? (
+                                    <div className="flex items-center gap-2">
+                                      <span
+                                        {...drag.dragHandleProps}
+                                        aria-label={`${key} 순서 드래그`}
+                                        className="cursor-grab rounded p-1 text-muted-foreground/60 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                      >
+                                        <GripVertical size={14} aria-hidden="true" />
+                                      </span>
+                                      {renderValue(value)}
+                                    </div>
+                                  ) : (
+                                    renderValue(value)
+                                  )}
+                                </td>
+                              ))}
+                            </tr>
+                          )}
+                        </Draggable>
+                      );
+                    })
+                  )}
+                  {provided.placeholder}
+                </tbody>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </table>
       </div>
-    </motion.div>
+      {table.pagination && table.pagination.allTotal > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">
+          <span>
+            전체 {table.pagination.allTotal}개 · {table.pagination.page} / {pageCount} 페이지
+          </span>
+          {pageCount > 1 && (
+            <ReactPaginate
+              previousLabel="이전"
+              nextLabel="다음"
+              breakLabel="…"
+              pageCount={pageCount}
+              marginPagesDisplayed={1}
+              pageRangeDisplayed={3}
+              onPageChange={({ selected }) => {
+                const pagination = { ...table.pagination!, page: selected + 1 };
+                setTable({ ...table, pagination });
+                pagination.onPageChange?.(selected + 1);
+              }}
+              forcePage={table.pagination.page - 1}
+              containerClassName="flex items-center gap-1"
+              pageLinkClassName="flex size-8 items-center justify-center rounded-md hover:bg-muted"
+              activeLinkClassName="bg-muted font-semibold text-foreground"
+              previousLinkClassName="rounded-md px-2 py-2 hover:bg-muted"
+              nextLinkClassName="rounded-md px-2 py-2 hover:bg-muted"
+              disabledLinkClassName="pointer-events-none opacity-40"
+            />
+          )}
+        </div>
+      )}
+    </div>
   );
 }
-
 export { Table };

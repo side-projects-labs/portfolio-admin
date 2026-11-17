@@ -24,7 +24,7 @@ export default async function RootLayout({
   const accessToken = !!(await getAccessToken());
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
       <body className={cn('bg-background font-sans', gabarito.variable)}>
         <Providers>
           <AppLayout isLogin={accessToken}>{children}</AppLayout>

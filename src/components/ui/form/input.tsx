@@ -1,6 +1,5 @@
 import { type RegisterOptions, type FieldErrors, type UseFormRegister } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
   name: string;
@@ -9,24 +8,32 @@ interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   validation?: RegisterOptions<any>;
   className?: string;
 }
-
-function FormInput(props: FormInputProps) {
-  const { id, name, register, errors, validation, className, ...restProps } = props;
-
+function FormInput({ id, name, register, errors, validation, className, ...props }: FormInputProps) {
+  const error = errors?.[id];
+  const errorId = `${id}-error`;
+  const description = [props['aria-describedby'], error && errorId].filter(Boolean).join(' ') || undefined;
   return (
     <>
-      <label htmlFor={id} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+      <label htmlFor={id} className="mb-2 block text-sm font-medium text-foreground">
         {name}
       </label>
       <input
         id={id}
-        className={cn('w-full p-2 border rounded-md', className)}
-        {...(register ? register(id, { ...validation }) : {})}
-        {...restProps}
+        className={cn(
+          'block min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:text-muted-foreground',
+          className,
+        )}
+        {...(register ? register(id, validation) : {})}
+        {...props}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={description}
       />
-      {errors && errors[id] && <p className="mt-2 text-sm text-red-600">{errors[id]?.message as string}</p>}
+      {error && (
+        <p id={errorId} role="alert" className="mt-2 text-xs text-destructive">
+          {error.message as string}
+        </p>
+      )}
     </>
   );
 }
-
 export { FormInput };

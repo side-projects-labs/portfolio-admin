@@ -1,10 +1,11 @@
 export const profileTableHeader = [
   {
     id: 1,
+    type: 'checkbox' as const,
   },
   {
     id: 2,
-    name: '이미지',
+    name: '프로필',
   },
   {
     id: 3,
@@ -12,10 +13,10 @@ export const profileTableHeader = [
   },
   {
     id: 4,
-    name: '등록/수정 날짜',
+    name: '최근 수정',
   },
   {
     id: 5,
-    name: '변경/삭제',
+    name: '관리',
   },
 ];

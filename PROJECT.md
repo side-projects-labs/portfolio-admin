@@ -3,19 +3,9 @@
   "schemaVersion": 1,
   "slug": "portfolio-admin",
   "title": "포트폴리오 관리자",
-  "description": "프로젝트·프로필·기술 스택을 관리하고 마크다운 본문과 이미지를 편집하는 Next.js 기반 관리자 대시보드입니다. 별도의 포트폴리오 API와 연동해 콘텐츠 관리 작업을 한곳에 모았습니다.",
+  "description": "프로젝트·프로필·기술 스택을 관리하고 마크다운 본문과 이미지를 편집하는 Next.js 기반 콘텐츠 관리 도구입니다. 별도의 포트폴리오 API와 연동해 콘텐츠 관리 작업을 한곳에 모았습니다.",
   "image": "https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/145f37b1bf59f3b75e6acb7251b83489b979c122/PROJECT.png",
-  "stacks": [
-    "Next.js",
-    "React.js",
-    "TypeScript",
-    "TailwindCSS",
-    "SWR",
-    "Zustand",
-    "React Hook Form",
-    "supabase",
-    "VisActor"
-  ],
+  "stacks": ["Next.js", "React.js", "TypeScript", "TailwindCSS", "SWR", "Zustand", "React Hook Form", "supabase"],
   "linkDemo": "https://admin.ycseng.com",
   "linkGithub": "https://github.com/side-projects-labs/portfolio-admin"
 }
@@ -43,7 +33,7 @@
 
 ![작성·공개 관리·API 저장과 이미지 업로드 흐름](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/content-workflow.png)
 
-*프로젝트를 작성해 공개 상태를 관리하는 흐름과, 이미지 파일·콘텐츠 저장의 역할을 구분했습니다.*
+_프로젝트를 작성해 공개 상태를 관리하는 흐름과, 이미지 파일·콘텐츠 저장의 역할을 구분했습니다._
 
 ## 🗂️ 관리 화면에서 다루는 작업
 
@@ -71,7 +61,7 @@
 
 ![로컬 ADMIN의 실제 프로젝트 목록 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/admin-projects.png)
 
-*로컬에서 실행한 ADMIN의 실제 목록 화면입니다. 프로젝트 정보와 기술 스택, 발행 상태, 순서 조정 기능을 한곳에서 확인합니다.*
+_개편 전 ADMIN의 목록 화면입니다. 현재는 검색·출처 필터와 게시 상태 집계를 추가하고, 화이트 기반의 간결한 테이블로 정리했습니다._
 
 ### 본문 작성과 미리보기
 
@@ -111,13 +101,15 @@ Google·GitHub OAuth 시작 주소로 이동해 외부 API의 인증 흐름을 �
 
 ![로컬에서 실행한 관리자 OAuth 로그인 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/admin-login.png)
 
-*로컬에서 실행한 ADMIN의 실제 로그인 화면입니다.*
+_로컬에서 실행한 ADMIN의 실제 로그인 화면입니다._
 
 ### 일관된 관리 화면
 
 Tailwind CSS와 공통 UI 컴포넌트로 폼·테이블·모달·탐색 메뉴를 구성했습니다. 포트폴리오 공통 UI 패키지의 스택 아이콘과 태그를 재사용하고, 다크 모드와 화면 크기에 따른 레이아웃을 지원합니다.
 
-대시보드에는 VisActor와 정적 예시 데이터를 사용하는 차트 UI를 포함합니다. 콘텐츠 관리 기능과 차트 표현을 같은 관리 화면 구성 안에서 다룹니다.
+샘플 통계 대시보드를 없애고 로그인 후 프로젝트 목록에서 바로 작업하도록 구성했습니다. 화이트를 기본으로 한 탐색 메뉴와 테이블을 사용하며 다크 모드는 보조 테마로 지원합니다. 프로젝트 전체 목록을 받은 뒤 게시·숨김 개수를 집계하고 제목·slug·설명 검색, 출처 필터와 최근 수정순 정렬을 제공합니다. 일부 페이지만 받아 전체 집계처럼 표시하지 않도록 조회 실패와 불완전한 응답을 구분합니다.
+
+프로필과 기술 스택도 같은 테이블·입력·모달을 사용합니다. 데이터가 없거나 요청이 실패한 상태를 명시하고, 입력 오류는 해당 필드에 연결합니다. 모바일 메뉴와 모달에서는 키보드로 이동하고 Escape로 닫은 뒤 원래 조작 위치로 돌아갈 수 있습니다.
 
 ## 🌱 콘텐츠와 함께 확장할 관리 공간
 

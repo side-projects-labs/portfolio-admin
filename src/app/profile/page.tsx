@@ -22,7 +22,10 @@ export default function Profile() {
   const router = useRouter();
 
   const { table, checkbox, setBody } = useTableStore();
-  const { data, isLoading, mutate } = useSWR<{ data: AdminProfileResponse[] }>(`/api/profile?page=1&size=5`, fetcher);
+  const { data, isLoading, error, mutate } = useSWR<{ status?: boolean; data: AdminProfileResponse[] }>(
+    `/api/profile?page=1&size=5`,
+    fetcher,
+  );
 
   const handleChangeStatus = async (request: AdminProfileResponse) => {
     const { id, isActive } = request;
@@ -92,7 +95,7 @@ export default function Profile() {
           {item.imageUrl && (
             <NextImage
               src={item.imageUrl}
-              alt="profile"
+              alt={item.name}
               className="mr-2 rounded-full"
               width={40}
               height={40}
@@ -117,36 +120,31 @@ export default function Profile() {
           title: item.isActive ? '사용' : '미사용',
         },
       },
-      updatedAt: dayjs(item.updatedAt).format('YYYY-MM-DD HH:mm:ss'),
+      updatedAt: dayjs(item.updatedAt).format('YYYY.MM.DD'),
       buttonGroup: (
-        <>
-          <Button
-            variant="secondary"
-            className="bg-gray-200 dark:bg-gray-500 hover:bg-gray-400 dark:hover:bg-gray-600 mb-2"
-            size="sm"
-            onClick={() => handleChangeStatus(item)}
-          >
+        <div className="flex flex-wrap items-center gap-1">
+          <Button variant="ghost" className="text-foreground" size="sm" onClick={() => handleChangeStatus(item)}>
             변경
           </Button>
-          <br />
+
           <Button
-            variant="secondary"
-            className="bg-green-200 dark:bg-green-500 hover:bg-green-400 dark:hover:bg-green-600 mb-2"
+            variant="ghost"
+            className="text-foreground"
             size="sm"
             onClick={() => router.push(`/profile/edit?id=${item.id}`)}
           >
             수정
           </Button>
-          <br />
+
           <Button
-            variant="secondary"
-            className="bg-red-300 dark:bg-red-500 hover:bg-red-400 dark:hover:bg-red-600 mb-2"
+            variant="ghost"
+            className="text-destructive hover:bg-destructive/10"
             size="sm"
             onClick={() => handleDelete(item.id)}
           >
             삭제
           </Button>
-        </>
+        </div>
       ),
     }));
   }, [data, router]);
@@ -157,29 +155,48 @@ export default function Profile() {
     }
   }, [profileTableData]);
 
+  if (error || data?.status === false)
+    return (
+      <section role="alert" className="rounded-lg border border-destructive/20 p-6">
+        <p>프로필을 불러오지 못했습니다.</p>
+        <Button className="mt-4" variant="outline" onClick={() => mutate()}>
+          다시 시도
+        </Button>
+      </section>
+    );
+
   if (isLoading) {
     return <Loading />;
   }
 
   return (
     <>
-      <WaringInfo
-        headTitle="이미지 업로드"
-        description={
-          <>
-            이미지는 최대 1MB 까지 업로드 하실 수 있습니다.
-            <br /> 용량 압축은 아래 파일 업로드 버튼을 클릭하여 진행해주세요.
-          </>
-        }
-      >
-        <input
-          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-          id="resize"
-          type="file"
-          onChange={handleResizeFile}
-          accept="image/*"
-        />
-      </WaringInfo>
+      <div className="mb-6">
+        <h2 className="text-base font-semibold">프로필 이미지</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          포트폴리오에 사용할 이미지를 등록하고 활성 상태를 관리합니다.
+        </p>
+      </div>
+      <details className="mb-6 rounded-lg border border-border p-4">
+        <summary className="cursor-pointer text-sm font-medium">이미지 압축 도구</summary>
+        <WaringInfo
+          headTitle="이미지 업로드"
+          description={
+            <>
+              이미지는 최대 1MB 까지 업로드 하실 수 있습니다. 용량 압축은 아래 파일 업로드 버튼을 클릭하여 진행해주세요.
+            </>
+          }
+        >
+          <input
+            className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            aria-label="압축할 프로필 이미지"
+            id="resize"
+            type="file"
+            onChange={handleResizeFile}
+            accept="image/*"
+          />
+        </WaringInfo>
+      </details>
 
       <Button variant="secondary" className="mb-4" onClick={() => router.push('/profile/create')}>
         프로필 생성
@@ -192,6 +209,11 @@ export default function Profile() {
         프로필 다운로드
       </Button>
 
+      {profileTableData.length === 0 && (
+        <p className="my-6 rounded-lg border border-dashed border-border px-6 py-16 text-center text-sm text-muted-foreground">
+          등록된 프로필이 없습니다.
+        </p>
+      )}
       {profileTableData.length > 0 && (
         <Table
           table={{

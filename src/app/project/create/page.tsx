@@ -127,7 +127,6 @@ export default function ProjectCreate() {
                 message: '프로젝트명은 2글자 이상이어야 합니다.',
               },
             }}
-            className='"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"'
             placeholder="프로젝트 이름을 입력해주세요"
             maxLength={12}
           />
@@ -150,7 +149,6 @@ export default function ProjectCreate() {
                 }
               },
             }}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="프로젝트 고유 아이디입니다. 중복되지 않도록 입력해주세요"
             maxLength={40}
           />
@@ -184,7 +182,6 @@ export default function ProjectCreate() {
             }}
             placeholder="설명을 입력해주세요."
             maxLength={100}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
         </FormSection>
         {stacksData?.data && (
@@ -202,22 +199,10 @@ export default function ProjectCreate() {
           </FormProvider>
         )}
         <FormSection>
-          <FormInput
-            id="linkDemo"
-            name="사이트 주소"
-            register={register}
-            placeholder="사이트 주소를 입력해주세요."
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          />
+          <FormInput id="linkDemo" name="사이트 주소" register={register} placeholder="사이트 주소를 입력해주세요." />
         </FormSection>
         <FormSection>
-          <FormInput
-            id="linkGithub"
-            name="깃허브 주소"
-            register={register}
-            placeholder="깃허브 주소를 입력해주세요."
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          />
+          <FormInput id="linkGithub" name="깃허브 주소" register={register} placeholder="깃허브 주소를 입력해주세요." />
         </FormSection>
 
         <FormSection label="이미지 설정">
@@ -237,7 +222,6 @@ export default function ProjectCreate() {
                       onChange={e => {
                         setValue('image', e.target.value);
                       }}
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     />
                     {watch('image') && (
                       <div className="mt-8">
@@ -267,7 +251,6 @@ export default function ProjectCreate() {
                       type="file"
                       onChange={handleFileUpload}
                       accept="image/*"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     />
                     {watch('image') && (
                       <div className="mt-8">

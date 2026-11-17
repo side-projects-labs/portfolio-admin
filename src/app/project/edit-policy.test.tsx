@@ -13,7 +13,6 @@ const mocks = vi.hoisted(() => ({
   mutate: vi.fn(),
   upload: vi.fn(),
   context: vi.fn(),
-  spell: vi.fn(),
 }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mocks.push }),
@@ -33,7 +32,6 @@ vi.mock('@/lib/file/upload', () => ({ uploadFile: (...args: unknown[]) => mocks.
 vi.mock('@/lib/file/read', () => ({ getFileUrl: vi.fn() }));
 vi.mock('@yeoncheols/portfolio-core-ui', () => ({ StackSelector: () => null }));
 vi.mock('@/lib/context/props', () => ({ usePropsContext: () => ({ setContextProps: mocks.context }) }));
-vi.mock('@/lib/zustand/spellCheck', () => ({ useSpellCheckStore: () => ({ setContent: mocks.spell }) }));
 vi.mock('@/components/nav', () => ({ TopNav: () => null }));
 vi.mock('@/components/ui/editor', () => ({
   Editor: ({ markdown, onEditorChange }: { markdown: string; onEditorChange: (value: string) => void }) => (

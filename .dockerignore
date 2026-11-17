@@ -1,0 +1,17 @@
+node_modules
+.pnpm-store
+.next
+out
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+*.log
+coverage
+mcp
+
+cert

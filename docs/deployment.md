@@ -25,6 +25,7 @@ Actions Variables에는 다음 값을 등록합니다.
 - 기능 브랜치 push와 `master` 대상 Pull Request는 린트·타입 검사·테스트를 실행하고, 성공하면 `development` 설정으로 Vercel Preview를 배포합니다.
 - `master` 푸시는 같은 검사를 통과한 뒤 `production` 설정으로 Vercel Production을 배포합니다.
 - CLI는 `cli-v0.4.0` 릴리스에서 내려받고 SHA256 체크섬을 확인합니다.
+- GitHub Actions와 Vercel은 Node.js 22를 사용합니다.
 - `vercel.json`의 `ignoreCommand`가 Git 연동 배포를 건너뛰어 GitHub Actions와 중복 배포되지 않게 합니다.
 
 Vercel의 기본 Git 배포를 건너뛰므로 Actions Secrets를 등록하고 최초 워크플로 실행이 성공하는지 확인한 뒤 이 흐름을 운영에 적용해야 합니다.

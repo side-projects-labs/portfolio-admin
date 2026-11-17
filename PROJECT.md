@@ -4,7 +4,7 @@
   "slug": "portfolio-admin",
   "title": "포트폴리오 관리자",
   "description": "프로젝트·프로필·기술 스택을 관리하고 마크다운 본문과 이미지를 편집하는 Next.js 기반 콘텐츠 관리 도구입니다. 별도의 포트폴리오 API와 연동해 콘텐츠 관리 작업을 한곳에 모았습니다.",
-  "image": "https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/145f37b1bf59f3b75e6acb7251b83489b979c122/PROJECT.png",
+  "image": "https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/feat/7-admin-ui-ux/PROJECT.png",
   "stacks": ["Next.js", "React.js", "TypeScript", "TailwindCSS", "SWR", "Zustand", "React Hook Form", "supabase"],
   "linkDemo": "https://admin.ycseng.com",
   "linkGithub": "https://github.com/side-projects-labs/portfolio-admin"
@@ -55,25 +55,19 @@ _프로젝트를 작성해 공개 상태를 관리하는 흐름과, 이미지 �
 
 프로젝트 생성·수정 화면에서 제목, slug, 설명, 기술 스택, 이미지, 외부 링크를 입력합니다. React Hook Form으로 입력 상태와 필드별 검증 메시지를 관리하고, slug 중복 확인 결과를 별도로 표시합니다.
 
-목록은 페이지 단위로 조회하며, 각 항목의 발행·미발행 상태를 바꾸거나 삭제할 수 있습니다. 노출 순서는 위·아래 이동 버튼과 드래그로 변경합니다. 변경 요청 후에는 관련 목록 데이터를 다시 검증해 관리 화면에 반영합니다.
+목록 화면에서 전체 프로젝트를 조회하고, 게시·숨김 집계와 제목·slug·설명 검색, 출처 필터, 최근 수정순 정렬로 목록을 좁혀봅니다. 각 프로젝트의 게시 상태를 바꾸거나 삭제할 수 있으며, 노출 순서는 위·아래 이동 버튼과 드래그로 조정합니다. 변경 후에는 목록 데이터를 다시 불러오고 조회 실패는 빈 목록과 구분해 재시도를 제공합니다.
 
 저장소에서 자동 동기화하는 개인 프로젝트와 직접 관리하는 회사 프로젝트를 같은 목록에서 확인합니다. API의 수정 차단 상태에 따라 개인 프로젝트는 행 배경과 강조선·잠금 표시로 읽기 전용 상태를 구분하고 정보·본문 편집을 제한합니다. 수정 URL에 직접 접근해도 콘텐츠를 저장할 수 없으며, 게시·숨김 전환과 순서 조정·삭제는 계속 사용할 수 있습니다.
 
-![로컬 ADMIN의 실제 프로젝트 목록 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/admin-projects.png)
+![개편한 프로젝트 관리 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/feat/7-admin-ui-ux/public/project/admin-projects.png)
 
-_개편 전 ADMIN의 목록 화면입니다. 현재는 검색·출처 필터와 게시 상태 집계를 추가하고, 화이트 기반의 간결한 테이블로 정리했습니다._
+_프로젝트를 검색하고 출처·게시 상태로 좁혀 보며, 자동 동기화 프로젝트의 읽기 전용 상태를 행 단위로 구분합니다._
 
 ### 본문 작성과 미리보기
 
 프로젝트를 짧게 소개하는 정보와 개발 과정을 길게 풀어내는 글은 작성할 때 다루는 내용이 다릅니다. 기본 정보와 본문을 작성하는 화면을 분리해, 제목·요약·링크를 관리하는 흐름과 긴 글을 편집하는 흐름을 구분했습니다. 본문 에디터는 마크다운을 입력받고, 미리보기 화면에서는 제목·이미지·기술 스택과 본문을 함께 확인합니다.
 
 본문 렌더링에는 React Markdown과 GFM 확장을 사용합니다. 표, 목록, 인용문, 링크와 코드 블록을 표현하며, 별도의 코드 렌더링 컴포넌트로 하이라이팅을 처리합니다. 기술 스택은 이름뿐 아니라 등록된 아이콘과 색상 메타데이터를 함께 사용합니다.
-
-### 작성 내용의 맞춤법 검사
-
-에디터에서 작성한 내용을 맞춤법 검사 화면으로 전달할 수 있습니다. 서버의 맞춤법 검사 경로에 마크다운 형식을 유지한 교정을 요청하고, 화면에서는 교정된 텍스트와 오류 항목, 개선 제안을 보여줍니다.
-
-교정 결과에는 복사 기능을 제공해 작성자가 내용을 확인한 뒤 편집에 활용할 수 있도록 했습니다. 외부 교정 서비스 호출은 서버 경로를 통해 처리합니다.
 
 ### 이미지 업로드와 저장 경로 분리
 
@@ -83,9 +77,17 @@ _개편 전 ADMIN의 목록 화면입니다. 현재는 검색·출처 필터와 
 
 ### 프로필과 기술 스택 관리
 
-프로필 화면에서는 항목을 생성·수정하고 사용할 프로필을 활성화합니다. 프로필 이미지도 파일 업로드와 URL 입력 흐름으로 다룹니다.
+프로필 화면에서는 항목을 생성·수정하고 사용할 프로필을 활성화합니다. 이미지 압축 도구에서 파일을 선택하면 용량을 줄여 업로드할 수 있습니다. 생성·다운로드 작업은 목록 위에 배치해 바로 찾을 수 있습니다.
 
-기술 스택 화면은 이름·아이콘·색상·분류 정보를 관리합니다. 같은 메타데이터를 프로젝트 입력과 미리보기에서 사용해 스택 표현을 연결했습니다.
+![개편한 프로필 관리 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/feat/7-admin-ui-ux/public/project/admin-profile.png)
+
+_프로필 이미지 용량 줄이기, 생성·다운로드 작업과 활성 상태 목록을 한 화면에서 관리합니다._
+
+기술 스택 화면은 이름·아이콘·색상·분류 정보를 관리합니다. 같은 메타데이터를 프로젝트 입력과 미리보기에서 사용해 스택 표현을 연결합니다.
+
+![개편한 기술 스택 관리 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/feat/7-admin-ui-ux/public/project/admin-stacks.png)
+
+_기술 이름과 아이콘, 색상, 분류를 테이블에서 관리합니다._
 
 ## 🛠️ 구조와 구현 선택
 
@@ -99,9 +101,9 @@ Next.js App Router가 관리자 화면과 API 중계 경로를 구성하고, 별
 
 Google·GitHub OAuth 시작 주소로 이동해 외부 API의 인증 흐름을 사용하고, 앱에서는 쿠키에 기반한 페이지 접근과 로그인 상태를 확인합니다. 로그인 뒤 돌아갈 주소는 내부 경로로 제한해 외부 주소나 잘못된 경로가 복귀 대상으로 사용되지 않도록 검증합니다.
 
-![로컬에서 실행한 관리자 OAuth 로그인 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/e0ad687d4513509f858be4ca5907a820a8ebe593/public/project/admin-login.png)
+![최신 관리자 로그인 화면](https://raw.githubusercontent.com/side-projects-labs/portfolio-admin/feat/7-admin-ui-ux/public/project/admin-login.png)
 
-_로컬에서 실행한 ADMIN의 실제 로그인 화면입니다._
+_Google 또는 GitHub 계정으로 관리자 인증을 시작하는 화면입니다._
 
 ### 일관된 관리 화면
 

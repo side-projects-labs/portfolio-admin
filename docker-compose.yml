@@ -1,0 +1,29 @@
+name: portfolio-admin-local
+
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      secrets:
+        - npm-token
+    environment:
+      API_URL: ${API_URL:?Run through portfolio-config}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Run through portfolio-config}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?Run through portfolio-config}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?Run through portfolio-config}
+      NEXT_PUBLIC_STORAGE_BUCKET: ${NEXT_PUBLIC_STORAGE_BUCKET:?Run through portfolio-config}
+      NODE_ENV: development
+      WATCHPACK_POLLING: 'true'
+    ports:
+      - '127.0.0.1:5002:5001'
+    volumes:
+      - ./src:/app/src:delegated
+      - ./public:/app/public:delegated
+      - ./docs:/app/docs:delegated
+      - ./cert:/app/cert:ro
+    init: true
+
+secrets:
+  npm-token:
+    environment: GITHUB_NPM_TOKEN

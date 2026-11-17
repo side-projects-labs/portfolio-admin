@@ -1,5 +1,5 @@
 export const stackTableHeader = [
-  { id: 1 },
+  { id: 1, type: 'checkbox' as const },
   { id: 2, name: '스택명' },
   { id: 3, name: '아이콘' },
   { id: 4, name: '색상' },

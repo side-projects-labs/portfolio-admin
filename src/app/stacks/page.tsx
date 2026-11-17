@@ -2,7 +2,7 @@
 
 import { StackTag } from '@yeoncheols/portfolio-core-ui';
 import { isEqual } from 'lodash-es';
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import { Button, Modal, Table, StackIconManager, StackForm } from '@/components/ui';
@@ -26,16 +26,15 @@ export default function StacksManagement() {
   const [formMode, setFormMode] = useState<StackFormProps['formMode']>('none');
   const [showIconManager, setShowIconManager] = useState(false);
 
-  const allCount = useRef<number>(0);
+  const [page, setPage] = useState(INITIAL_PAGINATION.PAGE);
 
   const {
     data: stacksData,
     isLoading: isStacksLoading,
+    error: stacksError,
     mutate: stacksMutate,
-  } = useSWR<{ data: AdminTagSearchResponse }>(
-    `/api/stacks?page=${table.pagination?.page ?? INITIAL_PAGINATION['PAGE']}&size=${
-      table.pagination?.size ?? INITIAL_PAGINATION['SIZE']
-    }`,
+  } = useSWR<{ status?: boolean; data: AdminTagSearchResponse }>(
+    `/api/stacks?page=${page}&size=${INITIAL_PAGINATION.SIZE}`,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -113,28 +112,34 @@ export default function StacksManagement() {
   };
 
   // 스택 삭제
-  const handleDeleteStack = async (stackName: string) => {
-    if (!confirm(`정말로 "${stackName}" 스택을 삭제하시겠습니까?`)) return;
+  const handleDeleteStack = useCallback(
+    async (stackName: string) => {
+      if (!confirm(`정말로 "${stackName}" 스택을 삭제하시겠습니까?`)) return;
 
-    try {
-      const response = await deleteData(`/api/stacks/${stackName}`);
+      try {
+        const response = await deleteData(`/api/stacks/${stackName}`);
 
-      if (response.status) {
-        await stacksMutate();
+        if (response.status) {
+          await stacksMutate();
+        }
+      } catch {
+        console.info('Failed to delete stack');
       }
-    } catch {
-      console.info('Failed to delete stack');
-    }
-  };
+    },
+    [stacksMutate],
+  );
 
   // 수정 모드 시작
-  const startEditing = (stack: AdminTagResponse) => {
-    setFormMode('edit');
-    setValue('name', stack.name);
-    setValue('icon', stack.icon);
-    setValue('color', stack.color);
-    setValue('category', stack.category);
-  };
+  const startEditing = useCallback(
+    (stack: AdminTagResponse) => {
+      setFormMode('edit');
+      setValue('name', stack.name);
+      setValue('icon', stack.icon);
+      setValue('color', stack.color);
+      setValue('category', stack.category);
+    },
+    [setValue],
+  );
 
   // 등록 취소
   const cacncelMode = () => {
@@ -144,7 +149,7 @@ export default function StacksManagement() {
 
   const stacksTableData = useMemo(
     () =>
-      stacksData?.data.data.map(stack => ({
+      stacksData?.data?.data.map(stack => ({
         id: {
           checkbox: {
             id: `checkbox-${stack.name}`,
@@ -188,23 +193,21 @@ export default function StacksManagement() {
           </div>
         ),
       })) || [],
-    [stacksData],
+    [handleDeleteStack, stacksData, startEditing],
   );
 
   useEffect(() => {
     if (!isEqual(stacksTableData, table.body)) {
       setBody(stacksTableData);
     }
-  }, [stacksTableData]);
-
-  useEffect(() => {
-    if (stacksData?.data) {
-      allCount.current = stacksData?.data.allTotal;
-    }
-  }, [stacksData?.data]);
+  }, [setBody, stacksTableData, table.body]);
 
   return (
     <>
+      <div className="mb-6">
+        <h2 className="text-base font-semibold">기술 스택 라이브러리</h2>
+        <p className="mt-1 text-sm text-muted-foreground">프로젝트에서 사용하는 기술의 이름과 아이콘을 관리합니다.</p>
+      </div>
       {/* 아이콘 관리자 토글 버튼 */}
       <div className="flex items-center justify-between mb-4">
         <Button variant="secondary" onClick={() => setFormMode('add')}>
@@ -247,20 +250,31 @@ export default function StacksManagement() {
         />
       </Modal>
 
+      {(stacksError || stacksData?.status === false) && (
+        <div role="alert" className="mb-4 rounded-lg border border-destructive/20 p-4">
+          <p className="text-sm">기술 스택을 불러오지 못했습니다.</p>
+          <Button variant="outline" className="mt-2" onClick={() => stacksMutate()}>
+            다시 시도
+          </Button>
+        </div>
+      )}
       {/* 스택 테이블 */}
-      <Table
-        isLoading={isStacksLoading}
-        table={{
-          header: stackTableHeader,
-          body: stacksTableData,
-          pagination: {
-            allTotal: allCount.current,
-            total: stacksData?.data.total ?? INITIAL_PAGINATION['TOTAL'],
-            page: table.pagination?.page ?? INITIAL_PAGINATION['PAGE'],
-            size: table.pagination?.size ?? INITIAL_PAGINATION['SIZE'],
-          },
-        }}
-      />
+      {!stacksError && stacksData?.status !== false && (
+        <Table
+          isLoading={isStacksLoading}
+          table={{
+            header: stackTableHeader,
+            body: stacksTableData,
+            pagination: {
+              allTotal: stacksData?.data?.allTotal ?? 0,
+              total: stacksData?.data?.total ?? INITIAL_PAGINATION['TOTAL'],
+              page,
+              size: INITIAL_PAGINATION.SIZE,
+              onPageChange: setPage,
+            },
+          }}
+        />
+      )}
     </>
   );
 }

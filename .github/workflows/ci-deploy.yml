@@ -1,0 +1,142 @@
+name: CI and Vercel deployment
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - '**'
+
+concurrency:
+  group: portfolio-admin-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint, type-check, and test
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PORTFOLIO_CONFIG_READ_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install portfolio-config CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          asset="portfolio-config-v0.4.0-x86_64-unknown-linux-musl.tar.gz"
+          download_dir="$RUNNER_TEMP/portfolio-config"
+          mkdir -p "$download_dir" "$HOME/.local/bin"
+          gh release download cli-v0.4.0 \
+            --repo YeonCheols/portfolio-config \
+            --pattern "$asset" \
+            --pattern SHA256SUMS \
+            --dir "$download_dir"
+          (cd "$download_dir" && sha256sum --check --ignore-missing SHA256SUMS)
+          tar -xzf "$download_dir/$asset" -C "$HOME/.local/bin" portfolio-config
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install dependencies from portfolio-config
+        run: portfolio-config run --app portfolio-admin --env development --inherit-env -- pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Test
+        run: pnpm test
+
+  deploy:
+    name: Build and deploy to Vercel
+    needs: ci
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.PORTFOLIO_CONFIG_READ_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install portfolio-config CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          asset="portfolio-config-v0.4.0-x86_64-unknown-linux-musl.tar.gz"
+          download_dir="$RUNNER_TEMP/portfolio-config"
+          mkdir -p "$download_dir" "$HOME/.local/bin"
+          gh release download cli-v0.4.0 \
+            --repo YeonCheols/portfolio-config \
+            --pattern "$asset" \
+            --pattern SHA256SUMS \
+            --dir "$download_dir"
+          (cd "$download_dir" && sha256sum --check --ignore-missing SHA256SUMS)
+          tar -xzf "$download_dir/$asset" -C "$HOME/.local/bin" portfolio-config
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install dependencies from portfolio-config
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+            portfolio-config run --app portfolio-admin --env production --inherit-env -- pnpm install --frozen-lockfile
+          else
+            portfolio-config run --app portfolio-admin --env development --inherit-env -- pnpm install --frozen-lockfile
+          fi
+
+      - name: Pull Vercel project settings
+        run: pnpm dlx vercel@latest pull --yes --environment="$VERCEL_ENVIRONMENT" --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_ENVIRONMENT: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && 'production' || 'preview' }}
+
+      - name: Build with portfolio-config
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+            portfolio-config run --app portfolio-admin --env production -- \
+              pnpm dlx vercel@latest build --prod --token="$VERCEL_TOKEN"
+          else
+            portfolio-config run --app portfolio-admin --env development -- \
+              pnpm dlx vercel@latest build --token="$VERCEL_TOKEN"
+          fi
+
+      - name: Deploy prebuilt Vercel output
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == "refs/heads/master" ]]; then
+            pnpm dlx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+          else
+            pnpm dlx vercel@latest deploy --prebuilt --token="$VERCEL_TOKEN"
+          fi

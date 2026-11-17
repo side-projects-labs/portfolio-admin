@@ -1,25 +1,18 @@
-import { ChevronDown } from "lucide-react";
-import Image from "next/image";
-
+import { PanelsTopLeft } from 'lucide-react';
+import Link from 'next/link';
 export default function User() {
   return (
-    <div className="flex h-16 items-center border-b border-border px-2">
-      <div className="flex w-full items-center justify-between rounded-md px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-800">
-        <div className="flex items-center">
-          <Image
-            src="/avatar.png"
-            alt="User"
-            className="mr-2 rounded-full"
-            width={36}
-            height={36}
-          />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">name</span>
-            <span className="text-xs text-muted-foreground">admin</span>
-          </div>
-        </div>
-        <ChevronDown size={16} />
-      </div>
-    </div>
+    <Link
+      href="/project"
+      className="flex h-20 items-center gap-3 px-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <span className="flex size-8 items-center justify-center rounded-lg border border-border bg-background text-foreground">
+        <PanelsTopLeft size={18} aria-hidden="true" />
+      </span>
+      <span>
+        <span className="block text-sm font-semibold tracking-tight">Portfolio</span>
+        <span className="block text-xs text-muted-foreground">콘텐츠 워크스페이스</span>
+      </span>
+    </Link>
   );
 }

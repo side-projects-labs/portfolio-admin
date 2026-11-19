@@ -61,6 +61,18 @@ jobs:
       - name: Test
         run: pnpm test
 
+  notify-start:
+    name: Notify deployment started
+    needs: ci
+    # Production(master push)만 알린다. 알림은 배포를 막지 않도록 deploy 와 병렬로 둔다.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    uses: side-projects-labs/side-projects-app/.github/workflows/notify-deployment.yml@80eb1c55b1c4641b7444b88714fb319dde1d460d
+    with:
+      project-id: portfolio-admin
+      status: started
+      detail: ${{ github.ref_name }}
+    secrets: inherit
+
   deploy:
     name: Build and deploy to Vercel
     needs: ci
@@ -140,3 +152,15 @@ jobs:
           else
             pnpm dlx vercel@latest deploy --prebuilt --token="$VERCEL_TOKEN"
           fi
+
+  notify-result:
+    name: Notify deployment result
+    needs: deploy
+    # 성공/실패만 알린다. 취소·skip 은 성공으로 오인되지 않도록 알리지 않는다.
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' && (needs.deploy.result == 'success' || needs.deploy.result == 'failure') }}
+    uses: side-projects-labs/side-projects-app/.github/workflows/notify-deployment.yml@80eb1c55b1c4641b7444b88714fb319dde1d460d
+    with:
+      project-id: portfolio-admin
+      status: ${{ needs.deploy.result == 'success' && 'succeeded' || 'failed' }}
+      detail: ${{ github.ref_name }}
+    secrets: inherit

@@ -26,7 +26,13 @@ export function LoginWithButton({ isLoggedIn = true }: { isLoggedIn?: boolean })
         {isLoggedIn ? (
           <DropdownMenuItem
             onClick={async () => {
-              await postData(`/user/logout`, {}, true);
+              const response = await postData(`/user/logout`, {}, true, {
+                loadingMsg: '로그아웃 중...',
+                successMsg: '로그아웃 되었습니다.',
+                errorMsg: '로그아웃에 실패했습니다.',
+              });
+              // 쿠키가 지워지지 않았는데 로그인 화면으로 보내면 로그아웃된 것으로 오해한다. 실패 안내는 요청 쪽 토스트가 맡는다
+              if (response?.status === false) return;
               router.push('/login');
               router.refresh();
             }}

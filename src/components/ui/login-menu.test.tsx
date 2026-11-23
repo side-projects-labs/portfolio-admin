@@ -55,7 +55,34 @@ describe('LoginWithButton', () => {
 
     await user.click(await screen.findByRole('menuitem', { name: 'Logout' }));
 
-    await waitFor(() => expect(postData).toHaveBeenCalledWith('/user/logout', {}, true));
+    await waitFor(() => expect(postData).toHaveBeenCalledWith('/user/logout', {}, true, expect.anything()));
     expect(push).toHaveBeenCalledWith('/login');
+  });
+
+  it('로그아웃 요청에는 로그아웃에 맞는 안내 문구를 쓴다', async () => {
+    render(<LoginWithButton />);
+    const user = await openMenu();
+
+    await user.click(await screen.findByRole('menuitem', { name: 'Logout' }));
+
+    await waitFor(() =>
+      expect(postData).toHaveBeenCalledWith('/user/logout', {}, true, {
+        loadingMsg: '로그아웃 중...',
+        successMsg: '로그아웃 되었습니다.',
+        errorMsg: '로그아웃에 실패했습니다.',
+      }),
+    );
+  });
+
+  it('로그아웃 요청이 실패하면 로그인 화면으로 이동하지 않는다', async () => {
+    postData.mockResolvedValue({ status: false, error: new Error('network') });
+    render(<LoginWithButton />);
+    const user = await openMenu();
+
+    await user.click(await screen.findByRole('menuitem', { name: 'Logout' }));
+
+    await waitFor(() => expect(postData).toHaveBeenCalled());
+    expect(push).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 });

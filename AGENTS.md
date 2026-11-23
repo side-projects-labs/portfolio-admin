@@ -14,7 +14,7 @@
 - src/lib/api.ts·axiosInstance.ts·fetcher.ts의 기존 요청 흐름을 재사용하고 서버용 API_URL과 공개 NEXT_PUBLIC_API_URL의 소비 경계를 구분합니다.
 - src/lib/auth.ts·oauth-login.ts·safe-callback-url.ts와 middleware.ts의 로그인·쿠키·복귀 경로 검증을 유지합니다. 외부 OAuth 로그인과 토큰 발급을 이 앱에서 별도로 구현하지 않습니다.
 - src/lib/file은 Supabase Storage 파일 처리와 WebP 변환을 소유합니다. 이미지 URL과 메타데이터 저장을 구분하며 임의의 새 저장소나 업로드 경로를 추가하지 않습니다.
-- src/hooks·src/lib/zustand·src/lib/atoms.ts의 기존 상태 소유권을 확인하고 같은 상태를 여러 곳에 복제하지 않습니다. SWR 변경 후 관련 캐시 갱신과 로딩·빈 결과·실패 상태를 함께 확인합니다.
+- src/hooks·src/lib/zustand의 기존 상태 소유권을 확인하고 같은 상태를 여러 곳에 복제하지 않습니다. SWR 변경 후 관련 캐시 갱신과 로딩·빈 결과·실패 상태를 함께 확인합니다.
 - API 타입은 docs/api.ts, 화면 타입은 src/types에서 확인합니다. docs/api.ts는 생성물이므로 API 계약 변경이 필요할 때만 pnpm fetch-schema로 갱신합니다.
 
 ## 실행과 검증

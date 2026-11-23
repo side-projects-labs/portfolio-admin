@@ -1,11 +1,9 @@
 import { type ToastOptions, type ApiResult, type CustomAxiosRequestConfig } from '@/types/api';
 import axiosInstance from './axiosInstance';
 
-const setBaseUrl = (client: boolean = false) => {
-  if (client) {
-    axiosInstance.defaults.baseURL = `${process.env.NEXT_PUBLIC_API_URL}`;
-  }
-};
+// 브라우저에서 API로 직접 보낼 때만 공개 주소를 요청별로 지정한다.
+// 공유 인스턴스의 기본 주소(서버용 API_URL)를 바꾸면 이후 요청이 모두 영향을 받는다.
+const baseUrlOf = (client: boolean = false) => (client ? `${process.env.NEXT_PUBLIC_API_URL}` : undefined);
 
 export const getData = async <T = any>(
   url: string,
@@ -13,9 +11,9 @@ export const getData = async <T = any>(
   client?: boolean,
   options?: ToastOptions,
 ): Promise<ApiResult<T>> => {
-  setBaseUrl(client);
   try {
     const config: CustomAxiosRequestConfig = {
+      baseURL: baseUrlOf(client),
       params,
       metadata: {
         disableToast: options?.disableToast,
@@ -32,9 +30,9 @@ export const getData = async <T = any>(
 };
 
 export const postData = async (url: string, data?: Record<string, any>, client?: boolean, options?: ToastOptions) => {
-  setBaseUrl(client);
   try {
     const config: CustomAxiosRequestConfig = {
+      baseURL: baseUrlOf(client),
       metadata: {
         disableToast: options?.disableToast,
         loadingMsg: options?.loadingMsg,
@@ -50,9 +48,9 @@ export const postData = async (url: string, data?: Record<string, any>, client?:
 };
 
 export const patchData = async (url: string, data?: Record<string, any>, client?: boolean, options?: ToastOptions) => {
-  setBaseUrl(client);
   try {
     const config: CustomAxiosRequestConfig = {
+      baseURL: baseUrlOf(client),
       metadata: {
         disableToast: options?.disableToast,
         loadingMsg: options?.loadingMsg,
@@ -68,9 +66,9 @@ export const patchData = async (url: string, data?: Record<string, any>, client?
 };
 
 export const putData = async (url: string, data?: Record<string, any>, client?: boolean, options?: ToastOptions) => {
-  setBaseUrl(client);
   try {
     const config: CustomAxiosRequestConfig = {
+      baseURL: baseUrlOf(client),
       metadata: {
         disableToast: options?.disableToast,
         loadingMsg: options?.loadingMsg,
@@ -86,9 +84,9 @@ export const putData = async (url: string, data?: Record<string, any>, client?: 
 };
 
 export const deleteData = async (url: string, data?: Record<string, any>, client?: boolean, options?: ToastOptions) => {
-  setBaseUrl(client);
   try {
     const config: CustomAxiosRequestConfig = {
+      baseURL: baseUrlOf(client),
       data,
       metadata: {
         disableToast: options?.disableToast,

@@ -1,0 +1,22 @@
+---
+description: 모든 작업 전에 저장소 공통 에이전트 지침(AGENTS.md)과 스킬을 따르도록 안내
+alwaysApply: true
+---
+
+# 에이전트 지침 진입점
+
+이 저장소의 지침 원본은 루트의 `AGENTS.md`입니다. 작업을 시작하기 전에 반드시 `AGENTS.md` 전체를 읽고 따릅니다.
+
+필수 스킬 (`.agents/skills/<name>/SKILL.md`, 작업 전에 해당 파일을 읽고 절차를 그대로 따름):
+
+- 코드 수정 → `tdd` (관련 테스트 추가/수정 필수. 테스트는 Vitest와 React Testing Library)
+- TDD는 요구·불변조건·소유자·테스트를 연결하고 실제 Red·Green 결과를 기록합니다. 통과 목적의 우회 분기를 금지하고 인접 경계를 검증합니다. 임시 근거 파일은 현재 작업이 만든 경로만 정리합니다.
+- 커밋 → `commit` (사용자가 요청할 때만. 코드 변경은 커밋 직전 `review` staged, 🔴 있으면 중단)
+- PR 생성 → `pr` (사용자가 요청할 때만. **`.github/pull_request_template.md` 사용 필수**, 모든 절을 순서대로 채우며 `gh pr create`는 템플릿을 자동으로 채우지 않으므로 파일을 읽어 옮겨 적음. 담당자는 `gh` 활성 계정, 생성 후 `review` branch 결과를 PR 댓글로)
+- 검증 → `qa` (`pnpm lint`, `pnpm type-check`, `pnpm test`, 필요하면 `pnpm build`)
+- 코드 리뷰 기준 → `review` (댓글은 TEMPLATE.md만 작성합니다. 목적·데이터 흐름·공통 소유권·불변조건을 검토하고, 코드·계약 근거와 기존 또는 필요한 회귀 테스트를 적습니다. 중요한 로컬 검증 미확인은 차단 표시가 있는 검증 보류로 보고합니다. 이 저장소에는 CI 리뷰가 없습니다.)
+- 이슈 생성 → `issue` (사용자가 요청할 때만. 본문은 `.github/ISSUE_TEMPLATE.md`. 상태는 조직 Project `@NoCodeBuild` Status의 Todo, In Progress, In Review, Done. 라벨로 상태를 만들지 않음. 문장은 ~습니다 또는 ~ㅂ니다. ~다로 끝내지 않음)
+- 로그인·쿠키·복귀 경로(`access_token`, OAuth state, `safeCallbackUrl`) 검증을 우회하지 않습니다. `.env*`·토큰·비밀키를 출력하거나 커밋하지 않습니다.
+- 머지 → 사용자가 요청했고 `Lint, type-check, and test`가 성공하며 🔴가 없을 때만. 지침 변경 PR은 담당자가 직접 머지
+
+이 파일과 `AGENTS.md`가 다르면 `AGENTS.md`를 따릅니다.

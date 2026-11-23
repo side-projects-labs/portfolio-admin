@@ -14,7 +14,7 @@
 - src/lib/api.ts·axiosInstance.ts·fetcher.ts의 기존 요청 흐름을 재사용하고 서버용 API_URL과 공개 NEXT_PUBLIC_API_URL의 소비 경계를 구분합니다.
 - src/lib/auth.ts·oauth-login.ts·safe-callback-url.ts와 middleware.ts의 로그인·쿠키·복귀 경로 검증을 유지합니다. 외부 OAuth 로그인과 토큰 발급을 이 앱에서 별도로 구현하지 않습니다.
 - src/lib/file은 Supabase Storage 파일 처리와 WebP 변환을 소유합니다. 이미지 URL과 메타데이터 저장을 구분하며 임의의 새 저장소나 업로드 경로를 추가하지 않습니다.
-- src/hooks·src/lib/zustand·src/lib/atoms.ts의 기존 상태 소유권을 확인하고 같은 상태를 여러 곳에 복제하지 않습니다. SWR 변경 후 관련 캐시 갱신과 로딩·빈 결과·실패 상태를 함께 확인합니다.
+- src/hooks·src/lib/zustand의 기존 상태 소유권을 확인하고 같은 상태를 여러 곳에 복제하지 않습니다. SWR 변경 후 관련 캐시 갱신과 로딩·빈 결과·실패 상태를 함께 확인합니다.
 - API 타입은 docs/api.ts, 화면 타입은 src/types에서 확인합니다. docs/api.ts는 생성물이므로 API 계약 변경이 필요할 때만 pnpm fetch-schema로 갱신합니다.
 
 ## 실행과 검증
@@ -35,6 +35,76 @@
 - src/data의 예시 데이터·차트를 실제 운영 통계나 수집 성과로 소개하지 않습니다. 외부 API·저장소 권한·배포 설정은 요청 범위 없이 변경하지 않습니다.
 - master에 직접 커밋하지 않습니다. 작업 브랜치에서 요청한 변경만 다루고 사용자 요청 없이 커밋·푸시·PR 생성·머지·이슈 종료를 수행하지 않습니다.
 - 포트폴리오에 공개되는 소개의 원본은 루트 PROJECT.md입니다. 실제 기능·기술 스택이 바뀌면 함께 갱신하고 아래 Hub 관리 구간은 수동 재작성하지 않습니다.
+
+## 에이전트 스킬
+
+모든 에이전트(Cursor, Claude Code, Codex 등)가 공통으로 사용하는 스킬은 `.agents/skills/<skill-name>/SKILL.md`에 있습니다. `.cursor/skills/`와 `.claude/skills/`의 항목은 같은 디렉터리를 가리키는 심볼릭 링크입니다.
+
+### 필수 규칙
+
+아래 작업을 할 때는 해당 `SKILL.md`를 먼저 읽고 그 절차를 따릅니다. 사용자가 스킬 이름을 언급하지 않아도 적용하며, 임의의 방식으로 대체하지 않습니다. 스킬은 작업 절차를 정할 뿐이며 커밋·푸시·PR 생성·머지·이슈 생성과 종료는 위 "코드 스타일과 안전"의 규칙대로 사용자가 요청했을 때만 수행합니다.
+
+1. **코드 수정 → `tdd` 스킬**
+   - `src/`와 `src/middleware.ts`의 코드(기능 추가, 버그 수정, 리팩터링)를 수정할 때는 `tdd` 스킬로 진행합니다.
+   - 실패하는 테스트를 먼저 작성하고 실패를 확인한 뒤에 구현 코드를 수정합니다. 코드를 수정하면 관련 파일의 테스트도 추가하거나 수정합니다.
+   - 문서(`*.md`)와 설정만 바꾸는 경우는 예외이며, 그 판단 근거를 사용자에게 알립니다.
+   - 요구사항·불변조건을 구현 소유자와 테스트에 연결하고 실제 Red·Green 명령과 결과를 기록합니다. 원인 대신 fallback·타입 우회·테스트 전용 분기로 통과시키지 않습니다.
+2. **커밋 → `commit` 스킬**
+   - 커밋은 사용자가 요청했을 때 `commit` 스킬의 절차로만 수행합니다.
+   - 코드 변경 커밋은 직전에 `review` 스킬(staged)을 실행하고, 🔴 항목이 있으면 커밋하지 않고 보고합니다.
+3. **PR 생성 → `pr` 스킬**
+   - PR은 사용자가 요청했을 때 `pr` 스킬의 절차와 `.github/pull_request_template.md` 형식으로만 생성합니다.
+   - **PR 템플릿 사용은 필수입니다.** 본문은 템플릿의 모든 절(설명, 관련 이슈, 변경사항, 체크리스트, 검증 결과, 스크린샷, 추가 참고사항)을 순서대로 채웁니다. 절을 빼거나 순서를 바꾸거나 템플릿 없이 자유 형식으로 쓰지 않습니다. 해당하지 않는 절도 "없음"과 이유로 채웁니다.
+   - `gh pr create --body`와 `--body-file`은 템플릿을 자동으로 채워 주지 않습니다. 생성 전에 템플릿 파일을 읽어 절과 체크리스트를 그대로 옮기고 안내 주석(`[//]: # ...`)만 지웁니다. 이미 만든 PR이 템플릿을 따르지 않으면 `gh pr edit`으로 본문을 고칩니다.
+   - 체크리스트는 실제로 확인한 항목만 `[x]`로 표시하고, 확인하지 못한 항목은 비워 두고 이유를 적습니다.
+   - PR 담당자(assignee)는 현재 `gh`에 로그인된 활성 GitHub 계정으로 지정합니다.
+   - PR 생성 후 `review` 스킬(branch) 결과를 PR 댓글로 남깁니다. CI가 실패했거나 최신 리뷰에 🔴가 있으면 머지하지 않습니다.
+   - `AGENTS.md`와 `.agents/skills/` 같은 지침 변경 PR은 담당자가 직접 머지합니다.
+4. **코드 리뷰 기준 → `review` 스킬**
+   - 리뷰 댓글 본문은 `.agents/skills/review/TEMPLATE.md`만 채웁니다. 이슈 목적, 데이터 흐름, 공통 모델 소유권, 불변조건과 미확인 사항을 검토하고 발견마다 코드·계약 근거와 기존 또는 필요한 회귀 테스트를 적습니다.
+   - 이 저장소에는 CI 리뷰 워크플로가 없으므로 리뷰는 로컬 에이전트가 실행합니다. 수정 후에는 최신 변경 상태에서 다시 리뷰합니다.
+5. **이슈 생성 → `issue` 스킬**
+   - 이슈는 사용자가 요청했을 때 `issue` 스킬과 `.github/ISSUE_TEMPLATE.md`로만 만듭니다. 상태는 조직 Project `@NoCodeBuild`의 Status이고 값은 Project의 옵션(`Todo`, `In Progress`, `In Review`, `Done`)을 씁니다. 새 이슈는 `Todo`입니다. 라벨로 상태를 만들지 않습니다.
+   - 예상, 변경범위, 코드, 1급 시민, 불변조건, TDD 기준 테스트 조건은 목록입니다. 테스트 조건을 빼거나 뒤로 미루지 않습니다.
+   - 제목과 본문 문장은 `~습니다` 또는 `~ㅂ니다`로 끝냅니다. `~다`로 끝내지 않습니다.
+
+### 스킬 목록
+
+| 스킬     | 경로                             | 사용 시점                                                              |
+| -------- | -------------------------------- | ---------------------------------------------------------------------- |
+| `tdd`    | `.agents/skills/tdd/SKILL.md`    | **코드를 수정할 때 항상**                                              |
+| `commit` | `.agents/skills/commit/SKILL.md` | **커밋을 요청받았을 때**                                               |
+| `pr`     | `.agents/skills/pr/SKILL.md`     | **PR 생성을 요청받았을 때**                                            |
+| `qa`     | `.agents/skills/qa/SKILL.md`     | 작업 완료 전 검증, 커밋/PR 직전, "QA 해줘" 요청 시                     |
+| `review` | `.agents/skills/review/SKILL.md` | **커밋 직전(staged), PR 생성 직후(branch)**, "리뷰 해줘" 요청 시        |
+| `issue`  | `.agents/skills/issue/SKILL.md`  | **이슈 생성을 요청받았을 때**. 본문은 `.github/ISSUE_TEMPLATE.md`      |
+
+일반적인 작업 흐름: `tdd` → `qa` → `commit`(→ `review` staged) → `pr`(→ `review` branch 댓글) → CI(`Lint, type-check, and test`)가 성공하고 🔴가 없을 때만 사용자 요청으로 머지합니다.
+
+새 스킬 추가 방법:
+
+```bash
+mkdir -p .agents/skills/<kebab-case-name>   # SKILL.md 작성
+ln -s ../../.agents/skills/<kebab-case-name> .cursor/skills/<kebab-case-name>
+ln -s ../../.agents/skills/<kebab-case-name> .claude/skills/<kebab-case-name>
+```
+
+그다음 위 표에 등록합니다. 스킬 수정은 항상 `.agents/skills/` 원본에서 합니다.
+
+## 에이전트별 진입점
+
+에이전트마다 자동으로 읽는 파일이 달라서, 각 도구가 이 파일(`AGENTS.md`)로 오도록 진입점 파일을 둡니다. 진입점 파일에는 내용을 늘리지 않고, 지침은 항상 이 파일에서 수정합니다.
+
+| 에이전트       | 자동으로 읽는 파일                                  | 스킬 위치         |
+| -------------- | --------------------------------------------------- | ----------------- |
+| Cursor         | `AGENTS.md`, `.cursor/rules/agents.mdc` (항상 적용) | `.cursor/skills/` |
+| Codex          | `AGENTS.md`                                         | `.agents/skills/` |
+| Claude Code    | `CLAUDE.md` (`@AGENTS.md` 포함)                     | `.claude/skills/` |
+| Gemini CLI     | `GEMINI.md` (`@AGENTS.md` 포함)                     | `.agents/skills/` |
+| GitHub Copilot | `.github/copilot-instructions.md`                   | `.agents/skills/` |
+
+- 필수 규칙(스킬 목록, 필수 사용 시점)을 바꾸면 요약이 들어 있는 `.cursor/rules/agents.mdc`와 `.github/copilot-instructions.md`도 함께 갱신합니다.
+- 새 에이전트를 지원하려면 그 도구가 읽는 파일을 만들어 이 파일을 가리키게 하고 위 표에 추가합니다.
 
 <!-- portfolio-hub:project-guidance:start -->
 ## 포트폴리오 문서 입력 계약

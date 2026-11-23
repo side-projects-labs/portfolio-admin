@@ -64,7 +64,7 @@
    - 리뷰 댓글 본문은 `.agents/skills/review/TEMPLATE.md`만 채웁니다. 이슈 목적, 데이터 흐름, 공통 모델 소유권, 불변조건과 미확인 사항을 검토하고 발견마다 코드·계약 근거와 기존 또는 필요한 회귀 테스트를 적습니다.
    - 이 저장소에는 CI 리뷰 워크플로가 없으므로 리뷰는 로컬 에이전트가 실행합니다. 수정 후에는 최신 변경 상태에서 다시 리뷰합니다.
 5. **이슈 생성 → `issue` 스킬**
-   - 이슈는 사용자가 요청했을 때 `issue` 스킬과 `.github/ISSUE_TEMPLATE.md`로만 만듭니다. 상태는 GitHub Project의 Status이고 값은 `ToDo`, `In Progress`, `Review`, `Done`만 씁니다. 새 이슈는 `ToDo`입니다. 라벨로 상태를 만들지 않습니다.
+   - 이슈는 사용자가 요청했을 때 `issue` 스킬과 `.github/ISSUE_TEMPLATE.md`로만 만듭니다. 상태는 조직 Project `@NoCodeBuild`의 Status이고 값은 Project의 옵션(`Todo`, `In Progress`, `In Review`, `Done`)을 씁니다. 새 이슈는 `Todo`입니다. 라벨로 상태를 만들지 않습니다.
    - 예상, 변경범위, 코드, 1급 시민, 불변조건, TDD 기준 테스트 조건은 목록입니다. 테스트 조건을 빼거나 뒤로 미루지 않습니다.
    - 제목과 본문 문장은 `~습니다` 또는 `~ㅂ니다`로 끝냅니다. `~다`로 끝내지 않습니다.
 

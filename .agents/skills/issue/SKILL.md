@@ -18,7 +18,7 @@ disable-model-invocation: true
 - [ ] 5. 1급 시민 규칙을 확인한다. 예상의 동작이 1급 시민 목록과 테스트 조건에 없으면 만들지 않는다
 - [ ] 6. 제목과 본문이 아래 문체 규칙을 지키는지 확인한다
 - [ ] 7. 완성한 본문을 임시 파일로 검토한 뒤 gh issue create --repo <owner/repo> --assignee <login> --title <title> --body-file <path>로 생성한다
-- [ ] 8. GitHub Project `@NoCode_Build`(owner `YeonCheols`)에 이슈를 넣고 Status를 `ToDo`로 둔다
+- [ ] 8. 이 저장소의 GitHub Project `@NoCodeBuild`(조직 `side-projects-labs`의 Project)에 이슈를 넣고 Status를 `Todo`로 둔다
 - [ ] 9. 본문·담당자·요청된 상하위 관계·Project/Status 반영을 조회로 검증한다. 완료 시 URL을, 부분 실패 시 URL과 미완료 항목을 함께 보고한다
 ```
 
@@ -43,18 +43,19 @@ disable-model-invocation: true
 - 하위 이슈를 요청받으면 상위 이슈 본문·댓글과 기존 하위 항목을 확인합니다. 본문의 `#번호` 표기만으로 연결 완료로 보고하지 않습니다.
 - 생성 성공 후 반환된 이슈 번호를 유지합니다. REST sub-issue API에 필요한 정수 ID를 조회하고 `POST repos/<owner>/<repo>/issues/<parent>/sub_issues`에 `-F sub_issue_id=<id>`로 전달합니다. 연결 후 상위 이슈의 하위 목록에서 같은 이슈가 존재하는지 확인합니다.
 - 생성 또는 연결 요청이 시간 초과 등으로 불명확하면 먼저 조회로 실제 생성·반영 여부를 확인합니다. 관계·Project·Status 처리 실패로 같은 이슈를 다시 생성하지 않습니다. 실패 원인을 해결한 뒤 남은 단계만 재시도합니다.
-- Project·Status 권한이 부족하면 생성된 이슈와 관계는 보존하고 URL, 완료 항목, 미완료 항목과 원인을 보고합니다. 설정하지 않은 상태를 `ToDo`로 반영했다고 쓰지 않습니다.
+- Project·Status 권한이 부족하면 생성된 이슈와 관계는 보존하고 URL, 완료 항목, 미완료 항목과 원인을 보고합니다. 설정하지 않은 상태를 `Todo`로 반영했다고 쓰지 않습니다.
 
 ## Project와 상태
 
-이슈는 GitHub Project `@NoCode_Build`(owner `YeonCheols`)에 넣고 Status 필드로만 상태를 나타낸다. 라벨로 상태를 만들지 않는다. 값은 `ToDo`, `In Progress`, `Review`, `Done`만 쓴다.
+이슈는 조직 `side-projects-labs`의 GitHub Project `@NoCodeBuild`에 넣고 Status 필드로만 상태를 나타낸다. 라벨로 상태를 만들지 않는다. 값은 Project에 있는 옵션만 쓴다.
 
 - 프로젝트 번호, 필드 ID, 옵션 ID는 고정값으로 외워 두지 않고 실행할 때 조회한다
-  - `gh project list --owner YeonCheols`로 `@NoCode_Build`를 찾는다
-  - `gh project field-list <번호> --owner YeonCheols --format json`으로 Status 필드와 옵션 ID를 얻는다
-  - `gh project item-add <번호> --owner YeonCheols --url <이슈 URL> --format json`으로 넣고, `gh project item-edit`로 Status를 지정한다
-- 아직 시작하지 않았으면 `ToDo`, 작업을 시작했으면 `In Progress`, 리뷰로 넘겼으면 `Review`, 끝났으면 `Done`
-- 새 이슈는 `ToDo`다. 프로젝트에 넣은 뒤 Status를 비워 두지 않는다
+  - `gh project list --owner side-projects-labs`로 `@NoCodeBuild`를 찾는다
+  - `gh project field-list <번호> --owner side-projects-labs --format json`으로 Status 필드와 옵션 ID를 얻는다
+  - `gh project item-add <번호> --owner side-projects-labs --url <이슈 URL> --format json`으로 넣고, `gh project item-edit`로 Status를 지정한다
+- 아직 시작하지 않았으면 `Todo`, 작업을 시작했으면 `In Progress`, 리뷰로 넘겼으면 `In Review`, 끝났으면 `Done`을 쓴다. `Backlog`와 `Blocked`는 사용자가 요청했을 때만 쓴다
+- 새 이슈는 `Todo`다. 프로젝트에 넣은 뒤 Status를 비워 두지 않는다
+- 다른 저장소(portfolio-api, portfolio2)의 Project와 옵션 이름(`ToDo`, `Review`)을 복사하지 않는다
 
 ## 1급 시민
 

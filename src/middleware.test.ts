@@ -51,6 +51,21 @@ describe('middleware', () => {
     expect(response.headers.get('location')).toBeNull();
   });
 
+  it('인증 서버 장애 응답은 다시 시도를 안내하는 HTML이며 캐시하지 않는다', async () => {
+    getAccessToken.mockResolvedValue('token');
+    getData.mockResolvedValue({ status: false, error: { response: { status: 503 } } });
+
+    const response = await middleware(request('/stacks'));
+
+    expect(response.headers.get('content-type')).toContain('text/html');
+    expect(response.headers.get('retry-after')).toBe('10');
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    const body = await response.text();
+    expect(body).toContain('<html lang="ko">');
+    expect(body).toContain('인증 서버에 연결할 수 없습니다');
+    expect(body).toContain('잠시 후 다시 시도해주세요');
+  });
+
   it('토큰이 없으면 인증 서버를 호출하지 않는다', async () => {
     getAccessToken.mockResolvedValue(undefined);
 
